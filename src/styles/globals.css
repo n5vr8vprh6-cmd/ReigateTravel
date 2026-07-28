@@ -1,0 +1,271 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   REIGATE TRAVEL & CO. — DESIGN TOKENS
+   Palette, type, spacing and system tokens. Semantic roles map onto the six
+   locked brand colours. Body text is only ever Ink or Olive on Ivory/white/Sand;
+   Copper and Taupe are non-essential accents and never carry body text or
+   status meaning on their own.
+   ========================================================================== */
+@theme {
+  /* --- Brand palette (locked) --- */
+  --color-ink: #1b1b1b;
+  --color-olive: #404639;
+  --color-taupe: #a79886;
+  --color-sand: #dccfbe;
+  --color-ivory: #f6f2ed;
+  --color-copper: #c8906a;
+  --color-white: #ffffff;
+
+  /* --- Semantic surface + text roles --- */
+  --color-surface: #f6f2ed; /* Ivory — dominant page field */
+  --color-surface-raised: #ffffff; /* White — lift, cards, form fields */
+  --color-surface-sand: #dccfbe; /* Sand — quiet secondary bands */
+  --color-surface-inverse: #404639; /* Olive — deep band (final CTA, footer) */
+  --color-text: #1b1b1b; /* Ink — body + headings */
+  --color-text-muted: #404639; /* Olive — secondary text (AA on Ivory) */
+  --color-text-inverse: #f6f2ed; /* Ivory — text on Olive */
+  --color-accent: #c8906a; /* Copper — accents, decorative numerals, rules */
+  --color-rule: #a79886; /* Taupe — hairline rules, non-essential dividers */
+
+  /* --- Typography --- */
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cormorant), ui-serif, Georgia, "Times New Roman", serif;
+
+  /* Fluid type scale (min .. max across 390–1440px) */
+  --text-eyebrow: 0.8125rem; /* 13px labels */
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--letter-spacing: 0.14em;
+  --text-body: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem); /* 16–17px */
+  --text-body--line-height: 1.65;
+  --text-body-lg: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  --text-body-lg--line-height: 1.6;
+  --text-h3: clamp(1.25rem, 1.1rem + 0.7vw, 1.6rem);
+  --text-h3--line-height: 1.25;
+  --text-h2: clamp(1.75rem, 1.4rem + 1.6vw, 2.75rem);
+  --text-h2--line-height: 1.12;
+  --text-display: clamp(2.5rem, 1.7rem + 3.8vw, 4.5rem);
+  --text-display--line-height: 1.04;
+
+  /* --- Layout ---
+     NOTE: always wrap these in var() when consuming them from a Tailwind arbitrary value.
+     In v4 a bare custom-property name inside square brackets is treated as a literal value
+     and emits invalid CSS that browsers drop silently. Guarded by tests/e2e/tokens.spec.ts.
+     (Deliberately not spelling out the broken form here — Tailwind scans comments and would
+     generate the dead utility from the example itself.) */
+  --spacing-section: clamp(4.5rem, 3rem + 5vw, 9rem); /* 72px → 120px band rhythm */
+  --spacing-section-lg: clamp(6rem, 4rem + 6vw, 12rem); /* emphasis bands: open + close */
+  --container-content: 72rem; /* max page width */
+  --container-prose: 40rem; /* readable measure */
+
+  /* --- Borders / rules --- */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+
+  /* --- Motion --- */
+  --ease-calm: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --duration-base: 220ms;
+}
+
+/* =============================================================================
+   BASE
+   ========================================================================== */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    text-wrap: balance;
+    color: var(--color-text);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible, high-contrast focus for keyboard users on any focusable element. */
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Headings set their own colour above, which would otherwise keep Ink on the Olive band
+     (1.77:1 — a WCAG failure). Any heading inside an inverse surface inherits Ivory. */
+  [data-surface="inverse"] :is(h1, h2, h3, h4) {
+    color: var(--color-text-inverse);
+  }
+
+  /* On dark (Olive) surfaces, focus switches to Ivory for contrast. */
+  [data-surface="inverse"] :focus-visible {
+    outline-color: var(--color-ivory);
+  }
+
+  ::selection {
+    background-color: var(--color-sand);
+    color: var(--color-ink);
+  }
+}
+
+/* =============================================================================
+   MOTION
+   One orchestrated entrance on the hero, and nothing else. No scroll-triggered
+   reveals: content is never gated behind an observer, so it renders identically in
+   headless browsers, on hidden tabs, and with JS disabled.
+   ========================================================================== */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hero-drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+@layer components {
+  .hero-enter > div > * {
+    animation: hero-rise 900ms var(--ease-calm) both;
+  }
+  .hero-enter > div > *:nth-child(1) {
+    animation-delay: 60ms;
+  }
+  .hero-enter > div > *:nth-child(2) {
+    animation-delay: 160ms;
+  }
+  .hero-enter > div > *:nth-child(3) {
+    animation-delay: 260ms;
+  }
+  .hero-enter > div > *:nth-child(4) {
+    animation-delay: 360ms;
+  }
+
+  /* Very slow drift on the hero photograph. Transform only, so it never triggers layout. */
+  .hero-drift {
+    animation: hero-drift 24s var(--ease-calm) both;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Scroll reveal — TRANSFORM ONLY, never opacity. See the note in Reveal.tsx:
+     fading meant a missed observer callback left content permanently invisible,
+     and the arming step made copy visibly fade out on load. Offsetting by 1.5rem
+     is self-correcting; opacity 0 is not. The transition is gated on
+     [data-reveal-armed] so arming is instant and only the reveal animates.
+     -------------------------------------------------------------------------- */
+  [data-reveal="out"] {
+    transform: translateY(1.5rem);
+  }
+  [data-reveal="in"] {
+    transform: none;
+  }
+  [data-reveal-armed] {
+    transition: transform 800ms var(--ease-calm);
+  }
+
+  /* Stagger the children instead of the block — only where the content is a real sequence. */
+  [data-reveal-stagger][data-reveal="out"] > * {
+    transform: translateY(1.25rem);
+  }
+  [data-reveal-stagger][data-reveal="in"] > * {
+    transform: none;
+  }
+  [data-reveal-stagger][data-reveal-armed] > * {
+    transition: transform 700ms var(--ease-calm);
+  }
+  [data-reveal-stagger][data-reveal-armed] > *:nth-child(1) {
+    transition-delay: 0ms;
+  }
+  [data-reveal-stagger][data-reveal-armed] > *:nth-child(2) {
+    transition-delay: 70ms;
+  }
+  [data-reveal-stagger][data-reveal-armed] > *:nth-child(3) {
+    transition-delay: 140ms;
+  }
+  [data-reveal-stagger][data-reveal-armed] > *:nth-child(4) {
+    transition-delay: 210ms;
+  }
+  [data-reveal-stagger][data-reveal-armed] > *:nth-child(5) {
+    transition-delay: 280ms;
+  }
+
+  /* Signature device draws itself in when its section reveals, rather than fading like
+     everything else — the motion belongs to the brand mark, not to a generic transition. */
+  [data-reveal="out"] .horizon-rule path,
+  [data-reveal-stagger][data-reveal="out"] .horizon-rule path {
+    stroke-dashoffset: 100;
+  }
+  .horizon-rule path {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1100ms var(--ease-calm) 120ms;
+  }
+
+  /* Editorial images lift very slightly on pointer devices only. */
+  @media (hover: hover) {
+    .editorial-image img {
+      transition: transform 700ms var(--ease-calm);
+    }
+    .editorial-image:hover img {
+      transform: scale(1.03);
+    }
+  }
+}
+
+/* =============================================================================
+   REDUCED MOTION — honour the user preference globally.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    /* Delays must collapse too: a staggered `both`-filled animation would otherwise hold
+       its from-state (opacity 0) for the full delay and flash blank content. */
+    animation-delay: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Reveal.tsx already refuses to arm under reduced motion, so `data-reveal` is normally
+     absent here. Second line of defence for a mid-session preference change: never leave
+     content displaced. (It is never transparent — the reveal does not touch opacity.) */
+  [data-reveal],
+  [data-reveal] > * {
+    transform: none !important;
+  }
+  .horizon-rule path {
+    stroke-dashoffset: 0 !important;
+  }
+}
