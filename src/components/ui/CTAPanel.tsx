@@ -1,5 +1,6 @@
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/Button";
+import { HorizonRule } from "@/components/ui/HorizonRule";
 import type { CtaLink } from "@/types/content";
 
 interface CTAPanelProps {
@@ -25,9 +26,12 @@ export function CTAPanel({
 }: CTAPanelProps) {
   return (
     <div className="mx-auto max-w-[48rem] text-center">
+      {/* The signature device closes the page. Copper on Olive is low-contrast by design —
+          it is decorative and carries no meaning, so it never needs to clear AA. */}
+      <HorizonRule tone="accent" className="mx-auto mb-6 w-16" />
       {/* Headings inherit Ink from the base layer, which loses contrast on the Olive band
           (1.77:1). On an inverse surface the heading must be set to Ivory explicitly. */}
-      <h2 id={headingId} className={cn("text-h2", inverse && "text-ivory")}>
+      <h2 id={headingId} className={cn("text-statement", inverse && "text-ivory")}>
         {heading}
       </h2>
       {body ? (

@@ -1,4 +1,6 @@
+import Image from "next/image";
 import { Section } from "@/components/layout/Section";
+import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
 import { TextLink } from "@/components/ui/TextLink";
 import { StatusLabel } from "@/components/ui/StatusLabel";
@@ -12,7 +14,6 @@ import { ProcessSteps } from "@/components/content/ProcessSteps";
 import { FounderFeature } from "@/components/content/FounderFeature";
 import { ArticleCard } from "@/components/content/ArticleCard";
 import { NewsletterSignup } from "@/components/content/NewsletterSignup";
-import { Reveal } from "@/components/ui/Reveal";
 import { home } from "@/content/home";
 import { offers } from "@/content/offers";
 import { featuredArticles } from "@/content/articles";
@@ -62,20 +63,22 @@ export default function HomePage() {
         <div className="max-w-[46rem]">
           <SectionIntro heading={home.recognition.heading} headingId="recognition-heading" />
         </div>
-        <Reveal>
+        <div className="reveal">
           <RecognitionList statements={home.recognition.statements} />
           <p className="text-body-lg text-ink/85 mt-6 max-w-[40rem]">{home.recognition.bridge}</p>
-        </Reveal>
+        </div>
       </Section>
 
       {/* 4 — Bespoke Travel Planning (the current commercial priority — largest offer treatment) */}
       <Section surface="ivory" aria-labelledby="bespoke-heading">
         <div className="grid items-center gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
+          {/* Bleeds into the gutter at lg so one composition escapes the repeating box. */}
           <EditorialImage
             src={home.bespoke.image.src}
             alt={home.bespoke.image.alt}
             ratio="landscape"
-            sizes="(max-width: 1024px) 100vw, 48vw"
+            className="lg:-ml-[max(1.5rem,calc((100vw-var(--container-content))/2))] lg:w-[calc(100%+max(1.5rem,calc((100vw-var(--container-content))/2)))]"
+            sizes="(max-width: 1024px) 100vw, 55vw"
           />
           <div className="max-w-[36rem]">
             <StatusLabel status="available" className="mb-5" />
@@ -103,6 +106,7 @@ export default function HomePage() {
             eyebrow={home.method.eyebrow}
             heading={home.method.heading}
             headingId="method-heading"
+            size="statement"
           />
         </div>
         <ProcessSteps />
@@ -117,7 +121,7 @@ export default function HomePage() {
             lead={home.ecosystem.subheading}
           />
         </div>
-        <Reveal className="mt-10 space-y-6">
+        <div className="reveal mt-10 space-y-6">
           {offers
             .filter((offer) => offer.emphasis === "primary")
             .map((offer) => (
@@ -130,13 +134,31 @@ export default function HomePage() {
                 <OfferCard key={offer.id} offer={offer} />
               ))}
           </div>
-        </Reveal>
+        </div>
       </Section>
 
-      {/* 7 — Community (State B: philosophy + invitation; no event is confirmed) */}
-      <Section surface="sand" aria-labelledby="community-heading">
-        <div className="grid items-center gap-8 lg:grid-cols-[1fr_1fr] lg:gap-14">
-          <div className="max-w-[34rem]">
+      {/* 7 — Community (State B: philosophy + invitation; no event is confirmed).
+          The page's one full-bleed break. Ten of eleven bands otherwise repeat the same
+          1152px box, which is the structural cause of the flatness — so this one goes
+          edge to edge and the copy panel overlaps upward into it for depth. Built from
+          primitives rather than <Section> because it deliberately has no band padding
+          above the image. Legibility comes from the solid panel, never from the
+          photograph, so it holds regardless of which image is placed here. */}
+      <section aria-labelledby="community-heading" className="bg-surface-sand relative isolate">
+        {/* Copper hairline marking the page's one structural break. The accent earns its
+            place here rather than being sprinkled; it is decorative and carries no meaning. */}
+        <div aria-hidden="true" className="bg-copper/70 h-px w-full" />
+        <div className="relative h-[38vh] min-h-[15rem] w-full overflow-hidden lg:h-[30rem]">
+          <Image
+            src={home.community.image.src}
+            alt={home.community.image.alt}
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        </div>
+        <Container className="pb-[var(--spacing-section)]">
+          <div className="bg-surface relative -mt-12 max-w-[40rem] p-8 sm:p-10 lg:-mt-28 lg:p-12">
             <SectionIntro heading={home.community.heading} headingId="community-heading" />
             {home.community.body.map((paragraph) => (
               <p key={paragraph} className="text-body text-ink/85 mt-4">
@@ -152,20 +174,14 @@ export default function HomePage() {
               </TextLink>
             </div>
           </div>
-          <EditorialImage
-            src={home.community.image.src}
-            alt={home.community.image.alt}
-            ratio="wide"
-            sizes="(max-width: 1024px) 100vw, 48vw"
-          />
-        </div>
-      </Section>
+        </Container>
+      </section>
 
       {/* 8 — Tyler introduction */}
       <Section surface="ivory" aria-label="About the founder">
-        <Reveal>
+        <div className="reveal">
           <FounderFeature />
-        </Reveal>
+        </div>
       </Section>
 
       {/* 9 — Travel Notes */}
@@ -175,6 +191,7 @@ export default function HomePage() {
             heading={home.travelNotes.heading}
             headingId="travel-notes-heading"
             lead={home.travelNotes.subheading}
+            size="sm"
           />
         </div>
         {featuredArticles.length > 0 ? (

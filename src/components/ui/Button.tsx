@@ -17,15 +17,19 @@ interface ButtonLinkProps {
 
 const base =
   "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-sm px-6 py-3 " +
-  "font-sans text-[0.9375rem] font-semibold tracking-wide transition-colors " +
-  "duration-[var(--duration-base)] ease-[var(--ease-calm)] focus-visible:outline-3";
+  "font-sans text-[0.9375rem] font-semibold tracking-wide transition-[colors,translate] " +
+  "duration-[var(--duration-base)] ease-[var(--ease-calm)] focus-visible:outline-3 " +
+  // A real pressed state. `translate` rather than `transform` so it never fights the
+  // scroll-linked transforms elsewhere, and it moves no neighbouring layout.
+  "active:translate-y-px";
 
 const variants: Record<"default" | "inverse", Record<Variant, string>> = {
   default: {
     // Ink fill / Ivory text on Ivory / Sand backgrounds. AA contrast.
     primary: "bg-ink text-ivory hover:bg-olive",
-    // Outlined; Ink text with a hairline that firms up on hover.
-    secondary: "border border-ink/40 text-ink hover:border-ink hover:bg-ink/5",
+    // Outlined; the hairline firms to Copper on hover — the accent doing real work rather
+    // than sitting decoratively. Contrast is carried by the Ink label, never by the border.
+    secondary: "border border-ink/40 text-ink hover:border-copper hover:bg-ink/5",
   },
   inverse: {
     // On the Olive band: Ivory fill / Ink text.

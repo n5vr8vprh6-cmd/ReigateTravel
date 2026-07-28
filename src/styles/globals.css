@@ -42,8 +42,16 @@
   --text-body-lg--line-height: 1.6;
   --text-h3: clamp(1.25rem, 1.1rem + 0.7vw, 1.6rem);
   --text-h3--line-height: 1.25;
+  /* Quiet step, for utility sections that should not compete with the narrative beats. */
+  --text-h2-sm: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --text-h2-sm--line-height: 1.18;
   --text-h2: clamp(1.75rem, 1.4rem + 1.6vw, 2.75rem);
   --text-h2--line-height: 1.12;
+  /* Statement step, between h2 and the hero. Every section heading used to render at the
+     identical 42.88px, which is the main reason the page read flat — two heading sizes on
+     an eleven-section page is no dynamic range at all. Use sparingly: two moments. */
+  --text-statement: clamp(2.25rem, 1.6rem + 3vw, 3.75rem);
+  --text-statement--line-height: 1.08;
   --text-display: clamp(2.5rem, 1.7rem + 3.8vw, 4.5rem);
   --text-display--line-height: 1.04;
 
@@ -126,9 +134,20 @@
 
 /* =============================================================================
    MOTION
-   One orchestrated entrance on the hero, and nothing else. No scroll-triggered
-   reveals: content is never gated behind an observer, so it renders identically in
-   headless browsers, on hidden tabs, and with JS disabled.
+
+   One orchestrated entrance on load (the hero), and scroll-linked motion for
+   everything else — implemented with CSS scroll-driven animations, no JavaScript.
+
+   Why CSS rather than IntersectionObserver: the observer version of this shipped and
+   could be outrun. A fast scroll or a programmatic jump meant the callback never
+   reported an intersection and the element stayed in its pre-reveal state. A view()
+   timeline is a function of scroll position, so there is no event to miss.
+
+   Two rules hold throughout:
+   - Transform only, never opacity. An animation that does not run must still leave
+     content readable.
+   - Everything scroll-linked sits inside @supports, so the ~16% of browsers without
+     view timelines get the settled state rather than a half-applied one.
    ========================================================================== */
 @keyframes hero-rise {
   from {
@@ -141,12 +160,41 @@
   }
 }
 
-@keyframes hero-drift {
+/* Scroll-linked keyframes. `translate`/`scale` are used as independent properties so
+   they compose with each other instead of one `transform` clobbering the other. */
+@keyframes rise-in {
   from {
-    transform: scale(1);
+    translate: 0 2rem;
   }
   to {
-    transform: scale(1.06);
+    translate: 0 0;
+  }
+}
+
+@keyframes image-parallax {
+  from {
+    translate: 0 -3.5%;
+  }
+  to {
+    translate: 0 3.5%;
+  }
+}
+
+@keyframes hero-zoom {
+  from {
+    scale: 1;
+  }
+  to {
+    scale: 1.09;
+  }
+}
+
+@keyframes draw-rule {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
   }
 }
 
@@ -167,73 +215,103 @@
     animation-delay: 360ms;
   }
 
-  /* Very slow drift on the hero photograph. Transform only, so it never triggers layout. */
+  /* Editorial images sit oversized so the parallax can travel inside the frame without
+     exposing an edge. The margin has to beat the travel: scale 1.12 leaves 6% of the frame
+     on each side against a ±3.5% translate (≈3.9% of the frame once scaled). Hover uses
+     `scale`, parallax uses `translate` — independent properties, so neither cancels the
+     other the way two `transform` declarations would. */
+  .editorial-image img {
+    scale: 1.12;
+  }
+
+  /* The hero's own keyframe drives scale from 1, so this only applies where the scroll
+     animation does not run (no support, reduced motion) — a static, harmless crop. */
   .hero-drift {
-    animation: hero-drift 24s var(--ease-calm) both;
+    scale: 1.04;
   }
 
-  /* ---------------------------------------------------------------------------
-     Scroll reveal — TRANSFORM ONLY, never opacity. See the note in Reveal.tsx:
-     fading meant a missed observer callback left content permanently invisible,
-     and the arming step made copy visibly fade out on load. Offsetting by 1.5rem
-     is self-correcting; opacity 0 is not. The transition is gated on
-     [data-reveal-armed] so arming is instant and only the reveal animates.
-     -------------------------------------------------------------------------- */
-  [data-reveal="out"] {
-    transform: translateY(1.5rem);
-  }
-  [data-reveal="in"] {
-    transform: none;
-  }
-  [data-reveal-armed] {
-    transition: transform 800ms var(--ease-calm);
+  @media (hover: hover) {
+    .editorial-image img {
+      transition: scale 700ms var(--ease-calm);
+    }
+    .editorial-image:hover img {
+      scale: 1.17;
+    }
   }
 
-  /* Stagger the children instead of the block — only where the content is a real sequence. */
-  [data-reveal-stagger][data-reveal="out"] > * {
-    transform: translateY(1.25rem);
-  }
-  [data-reveal-stagger][data-reveal="in"] > * {
-    transform: none;
-  }
-  [data-reveal-stagger][data-reveal-armed] > * {
-    transition: transform 700ms var(--ease-calm);
-  }
-  [data-reveal-stagger][data-reveal-armed] > *:nth-child(1) {
-    transition-delay: 0ms;
-  }
-  [data-reveal-stagger][data-reveal-armed] > *:nth-child(2) {
-    transition-delay: 70ms;
-  }
-  [data-reveal-stagger][data-reveal-armed] > *:nth-child(3) {
-    transition-delay: 140ms;
-  }
-  [data-reveal-stagger][data-reveal-armed] > *:nth-child(4) {
-    transition-delay: 210ms;
-  }
-  [data-reveal-stagger][data-reveal-armed] > *:nth-child(5) {
-    transition-delay: 280ms;
-  }
-
-  /* Signature device draws itself in when its section reveals, rather than fading like
-     everything else — the motion belongs to the brand mark, not to a generic transition. */
-  [data-reveal="out"] .horizon-rule path,
-  [data-reveal-stagger][data-reveal="out"] .horizon-rule path {
-    stroke-dashoffset: 100;
-  }
   .horizon-rule path {
     stroke-dasharray: 100;
     stroke-dashoffset: 0;
-    transition: stroke-dashoffset 1100ms var(--ease-calm) 120ms;
   }
 
-  /* Editorial images lift very slightly on pointer devices only. */
-  @media (hover: hover) {
-    .editorial-image img {
-      transition: transform 700ms var(--ease-calm);
-    }
-    .editorial-image:hover img {
-      transform: scale(1.03);
+  /* ---------------------------------------------------------------------------
+     Scroll-linked motion. Gated on @supports so unsupported browsers render the
+     settled state, and on prefers-reduced-motion so it never applies when the user
+     has asked for stillness.
+     -------------------------------------------------------------------------- */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        animation: rise-in linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 22%;
+      }
+
+      /* Stagger by shifting each item's range later, not by delay — scroll timelines
+         have no notion of animation-delay. Only for real sequences. */
+      .reveal-stagger > * {
+        animation: rise-in linear both;
+        animation-timeline: view();
+      }
+      .reveal-stagger > *:nth-child(1) {
+        animation-range: entry 0% cover 18%;
+      }
+      .reveal-stagger > *:nth-child(2) {
+        animation-range: entry 4% cover 22%;
+      }
+      .reveal-stagger > *:nth-child(3) {
+        animation-range: entry 8% cover 26%;
+      }
+      .reveal-stagger > *:nth-child(4) {
+        animation-range: entry 12% cover 30%;
+      }
+      .reveal-stagger > *:nth-child(5) {
+        animation-range: entry 16% cover 34%;
+      }
+
+      /* The signature device draws itself in — motion that belongs to the brand mark
+         rather than a generic fade applied to everything. */
+      .horizon-rule path {
+        animation: draw-rule linear both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 20%;
+      }
+
+      /* Photographs drift against their frame as the page moves.
+         The timeline must be NAMED and declared on the frame, not anonymous on the image.
+         `.editorial-image` sets `overflow: hidden`, which makes it a scroll container — so
+         an anonymous `view()` on the image inside it resolves against that non-scrolling
+         box and pins progress at a constant 50%. Naming it on the frame measures the
+         frame's travel through the page scroller instead, which is the intent. */
+      .editorial-image {
+        view-timeline-name: --editorial-frame;
+      }
+      .editorial-image img {
+        animation: image-parallax linear both;
+        animation-timeline: --editorial-frame;
+        animation-range: cover 0% cover 100%;
+      }
+
+      /* Same trap on the hero: its <section> is overflow-hidden, so `scroll()` resolved
+         against the section rather than the page. Named timeline on the section. */
+      .hero-frame {
+        view-timeline-name: --hero-frame;
+      }
+      .hero-drift {
+        animation: hero-zoom linear both;
+        animation-timeline: --hero-frame;
+        animation-range: cover 0% cover 100%;
+      }
     }
   }
 }
@@ -258,12 +336,14 @@
     scroll-behavior: auto !important;
   }
 
-  /* Reveal.tsx already refuses to arm under reduced motion, so `data-reveal` is normally
-     absent here. Second line of defence for a mid-session preference change: never leave
-     content displaced. (It is never transparent — the reveal does not touch opacity.) */
-  [data-reveal],
-  [data-reveal] > * {
-    transform: none !important;
+  /* Scroll-linked motion is already gated behind prefers-reduced-motion: no-preference,
+     so none of it applies here. This is the second line of defence for a mid-session
+     preference change: nothing may be left displaced, undrawn, or off-frame. */
+  .reveal,
+  .reveal-stagger > *,
+  .editorial-image img {
+    translate: none !important;
+    animation: none !important;
   }
   .horizon-rule path {
     stroke-dashoffset: 0 !important;

@@ -53,7 +53,15 @@ logo use, template/beige patterns, image crops, and whether future offers read a
 > are invisible to screenshot review — this is the reason `tests/e2e/tokens.spec.ts` now asserts
 > computed values. See `decision-log.md` #22 and `source-conflicts.md` #4.
 
-Current state (measured, production build, 2026-07-27):
+Current state after the depth + motion pass (measured, production build, 2026-07-27):
+
+- **4 distinct heading sizes** (72/60/44/32 at 1440) where there were 2; **2 full-bleed sections**
+  where there was 1; Copper on 3 elements where there was 1.
+- Scroll motion is CSS scroll-driven, no JavaScript. Verified running: hero zoom tracks 1.04 → 1.09,
+  image parallax tracks −3.5% → +3.5%, reveals track 32px → 0.
+- Hero contrast re-measured at both ends of the scroll-linked scale: worst case **5.34:1** at 390px.
+
+Earlier state (before that pass):
 
 - **1440px** — 11 sections; padding 120px (150px on the opening and closing bands); content capped
   at 1152px; page height 8240px; no horizontal overflow. Full-bleed photographic hero with a

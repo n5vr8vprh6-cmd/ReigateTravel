@@ -1,6 +1,19 @@
 import { cn } from "@/lib/cn";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 
+type Size = "statement" | "default" | "sm";
+
+/**
+ * Visual weight, independent of heading level. Every section heading rendering at the same
+ * size is the main reason a long page reads flat, so narrative beats get `statement` and
+ * utility sections get `sm`. Semantics stay h2 either way.
+ */
+const sizeClass: Record<Size, string> = {
+  statement: "text-statement",
+  default: "text-h2",
+  sm: "text-h2-sm",
+};
+
 interface SectionIntroProps {
   eyebrow?: string;
   heading: string;
@@ -9,6 +22,8 @@ interface SectionIntroProps {
   align?: "start" | "center";
   inverse?: boolean;
   className?: string;
+  /** Visual weight of the heading — not its level. */
+  size?: Size;
   /** Heading level — one H1 per page lives in the hero, so sections use h2 by default. */
   as?: "h2" | "h3";
 }
@@ -22,6 +37,7 @@ export function SectionIntro({
   align = "start",
   inverse = false,
   className,
+  size = "default",
   as: Heading = "h2",
 }: SectionIntroProps) {
   return (
@@ -33,7 +49,7 @@ export function SectionIntro({
       ) : null}
       <Heading
         id={headingId}
-        className={cn(Heading === "h2" ? "text-h2" : "text-h3", inverse && "text-ivory")}
+        className={cn(Heading === "h3" ? "text-h3" : sizeClass[size], inverse && "text-ivory")}
       >
         {heading}
       </Heading>

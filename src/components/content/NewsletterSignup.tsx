@@ -14,7 +14,8 @@ export function NewsletterSignup() {
 
   return (
     <div className="mx-auto max-w-[40rem] text-center">
-      <h2 className="text-h2">{heading}</h2>
+      {/* Quieter step: this is a utility invitation, not one of the narrative beats. */}
+      <h2 className="text-h2-sm">{heading}</h2>
       <p className="text-body-lg text-ink/85 mx-auto mt-4 max-w-[34rem]">{body}</p>
 
       {substack ? (

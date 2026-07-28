@@ -1,5 +1,4 @@
 import { methodStages } from "@/content/method";
-import { Reveal } from "@/components/ui/Reveal";
 
 /**
  * Section 5 — The Reigate Method. Five named stages as an ordered list (order is meaning).
@@ -12,8 +11,9 @@ import { Reveal } from "@/components/ui/Reveal";
  */
 export function ProcessSteps() {
   return (
-    // Staggered because this is a real ordered sequence — the motion carries the order.
-    <Reveal as="ol" stagger className="mt-10 grid gap-x-6 gap-y-8 lg:grid-cols-5">
+    // `reveal-stagger` is scroll-linked CSS (globals.css) — staggered because this is a real
+    // ordered sequence, so the motion carries the order rather than decorating it.
+    <ol className="reveal-stagger mt-10 grid gap-x-6 gap-y-8 lg:grid-cols-5">
       {methodStages.map((stage) => (
         <li key={stage.name} className="border-taupe/50 border-t pt-5">
           <span
@@ -26,6 +26,6 @@ export function ProcessSteps() {
           <p className="text-body text-ink/80 mt-2">{stage.description}</p>
         </li>
       ))}
-    </Reveal>
+    </ol>
   );
 }

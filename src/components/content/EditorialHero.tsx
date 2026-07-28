@@ -21,7 +21,7 @@ export function EditorialHero() {
     <section
       aria-labelledby="hero-heading"
       data-surface="inverse"
-      className="relative isolate flex min-h-[min(92svh,48rem)] items-end overflow-hidden"
+      className="hero-frame relative isolate flex min-h-[min(92svh,48rem)] items-end overflow-hidden"
     >
       <Image
         src={image.src}
