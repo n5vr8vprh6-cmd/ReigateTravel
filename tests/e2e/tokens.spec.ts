@@ -84,7 +84,9 @@ test.describe("Design tokens resolve to real computed values", () => {
 
   test("button and link transitions use the motion tokens", async ({ page }) => {
     await gotoHome(page);
-    const btn = await page.$eval("#hero-heading ~ div a", (el) => {
+    // Keyed off the section rather than the hero's internal nesting — the previous selector
+    // (`#hero-heading ~ div a`) broke the moment the hero was restructured into layers.
+    const btn = await page.$eval("section:has(#hero-heading) a[class*='min-h']", (el) => {
       const cs = getComputedStyle(el);
       return { duration: cs.transitionDuration, timing: cs.transitionTimingFunction };
     });

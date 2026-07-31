@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 export default function CommunityPage() {
   return (
     <ShellPage
-      status="in-development"
       eyebrow="Community Experiences"
       heading="Community begins close to home."
       lead="Reigate Community Experiences bring people together through movement, conversation, local partnerships, and shared moments designed to support living well."

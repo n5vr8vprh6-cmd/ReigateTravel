@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { StatusLabel } from "@/components/ui/StatusLabel";
 import { TextLink } from "@/components/ui/TextLink";
 import type { Offer } from "@/types/content";
 
@@ -11,8 +10,11 @@ interface OfferCardProps {
  * Ecosystem offer card. The primary (current) offer is a wide horizontal card with imagery;
  * in-development offers are quieter, text-only outlined cards. This enforces the rule that
  * future services never carry visual weight equal to the current commercial service, and
- * avoids attaching photography to offers that are not yet operating. Status is always shown
- * as visible text, never colour alone.
+ * avoids attaching photography to offers that are not yet operating.
+ *
+ * Status chips were removed at the client's direction (decision-log #31). Offer status is
+ * still stated in prose in homepage section 2, and the emphasis split below is what keeps
+ * in-development offers from carrying weight equal to the current commercial service.
  */
 export function OfferCard({ offer }: OfferCardProps) {
   if (offer.emphasis === "primary") {
@@ -30,7 +32,6 @@ export function OfferCard({ offer }: OfferCardProps) {
           </div>
         ) : null}
         <div className="flex flex-col gap-3 p-7 lg:p-9">
-          <StatusLabel status={offer.status} className="self-start" />
           <h3 className="font-display text-h3">{offer.name}</h3>
           <p className="text-body text-ink/80">{offer.description}</p>
           <div className="mt-auto pt-3">
@@ -43,7 +44,6 @@ export function OfferCard({ offer }: OfferCardProps) {
 
   return (
     <article className="border-ink/15 flex flex-col gap-3 rounded-sm border p-6">
-      <StatusLabel status={offer.status} className="self-start" />
       <h3 className="font-display text-[1.2rem] font-medium">{offer.name}</h3>
       <p className="text-body text-ink/75">{offer.description}</p>
       <div className="mt-auto pt-3">

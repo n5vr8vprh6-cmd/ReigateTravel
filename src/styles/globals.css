@@ -50,10 +50,13 @@
   /* Statement step, between h2 and the hero. Every section heading used to render at the
      identical 42.88px, which is the main reason the page read flat — two heading sizes on
      an eleven-section page is no dynamic range at all. Use sparingly: two moments. */
-  --text-statement: clamp(2.25rem, 1.6rem + 3vw, 3.75rem);
-  --text-statement--line-height: 1.08;
-  --text-display: clamp(2.5rem, 1.7rem + 3.8vw, 4.5rem);
-  --text-display--line-height: 1.04;
+  --text-statement: clamp(2.25rem, 1.5rem + 3.8vw, 4.5rem);
+  --text-statement--line-height: 1.06;
+  /* 6rem is the deliberate ceiling: above ~96px a headline is shouting rather than designed.
+     Was capped at 4.5rem, which measured only 5% of a 1440 viewport and read conservative. */
+  --text-display: clamp(2.75rem, 1.6rem + 5.2vw, 6rem);
+  --text-display--line-height: 1.02;
+  --text-display--letter-spacing: -0.02em;
 
   /* --- Layout ---
      NOTE: always wrap these in var() when consuming them from a Tailwind arbitrary value.
@@ -61,6 +64,8 @@
      and emits invalid CSS that browsers drop silently. Guarded by tests/e2e/tokens.spec.ts.
      (Deliberately not spelling out the broken form here — Tailwind scans comments and would
      generate the dead utility from the example itself.) */
+  /* Three steps so the page has real rhythm rather than one repeated interval. */
+  --spacing-section-sm: clamp(2.5rem, 1.8rem + 2.5vw, 4rem); /* short beats between movements */
   --spacing-section: clamp(4.5rem, 3rem + 5vw, 9rem); /* 72px → 120px band rhythm */
   --spacing-section-lg: clamp(6rem, 4rem + 6vw, 12rem); /* emphasis bands: open + close */
   --container-content: 72rem; /* max page width */
@@ -185,7 +190,92 @@
     scale: 1;
   }
   to {
-    scale: 1.09;
+    scale: 1.18;
+  }
+}
+
+/* Hero layers separate as the hero exits and converge again coming back. Transform only. */
+@keyframes hero-layer-lift {
+  from {
+    translate: 0 0;
+  }
+  to {
+    /* Per-element depth, set by [data-depth] below. */
+    translate: 0 var(--layer-shift, -4rem);
+  }
+}
+
+@keyframes cue-breathe {
+  0%,
+  100% {
+    scale: 1 0.4;
+    opacity: 0.35;
+  }
+  50% {
+    scale: 1 1;
+    opacity: 0.8;
+  }
+}
+
+/* The journey line draws down the page as the visitor descends, and retracts coming back. */
+@keyframes journey-draw {
+  from {
+    scale: 1 0;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+/* Pinned Method: stages rise into place as the sequence advances. Transform only. */
+@keyframes stage-rise {
+  from {
+    translate: 0 2.5rem;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+/* Decorative progress rule for the pinned sequence — safe to scale from zero. */
+@keyframes rule-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Scroll-scrubbed image sequence. `--sequence-travel` is set per instance from the frame
+   count, and pairs with steps(n, jump-none) so each step lands exactly on one frame. */
+@keyframes sequence-step {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 var(--sequence-travel, 0%);
+  }
+}
+
+/* Interlude: the deepest travel on the page. ±8% needs 1.22 base scale (11% each side). */
+@keyframes interlude-drift {
+  from {
+    translate: 0 -8%;
+  }
+  to {
+    translate: 0 8%;
+  }
+}
+
+/* The water advances as you descend. `scale` is a separate property from `translate`, so
+   this push-in composes with the parallax above instead of one replacing the other. */
+@keyframes interlude-approach {
+  from {
+    scale: 1.22;
+  }
+  to {
+    scale: 1.42;
   }
 }
 
@@ -199,19 +289,23 @@
 }
 
 @layer components {
-  .hero-enter > div > * {
+  /* The load entrance sits one level INSIDE each `.hero-layer` wrapper. The scroll lift is on
+     the wrapper itself. `animation` is a single property, so two rules targeting one element
+     cannot both apply — the more specific one silently replaces the other. Keeping them on
+     separate elements is what makes the two coexist. */
+  .hero-enter > div > * > * {
     animation: hero-rise 900ms var(--ease-calm) both;
   }
-  .hero-enter > div > *:nth-child(1) {
+  .hero-enter > div > *:nth-child(1) > * {
     animation-delay: 60ms;
   }
-  .hero-enter > div > *:nth-child(2) {
+  .hero-enter > div > *:nth-child(2) > * {
     animation-delay: 160ms;
   }
-  .hero-enter > div > *:nth-child(3) {
+  .hero-enter > div > *:nth-child(3) > * {
     animation-delay: 260ms;
   }
-  .hero-enter > div > *:nth-child(4) {
+  .hero-enter > div > *:nth-child(4) > * {
     animation-delay: 360ms;
   }
 
@@ -224,10 +318,26 @@
     scale: 1.12;
   }
 
+  /* ±8% travel — 1.22 leaves 11% each side. */
+  .interlude-image {
+    scale: 1.22;
+  }
+
   /* The hero's own keyframe drives scale from 1, so this only applies where the scroll
      animation does not run (no support, reduced motion) — a static, harmless crop. */
   .hero-drift {
     scale: 1.04;
+  }
+
+  /* Ambient hero video. Hidden by default so it is never downloaded on phones — combined
+     with preload="none" that means the bytes are only fetched where the layout actually
+     shows it. It fades up over the still rather than replacing it, so any failure to play
+     lands on the poster with no visible gap. */
+  /* Scroll cue: a hairline that breathes downward. The one piece of decorative time-based
+     motion left on the page, and it is a 2px hint on an aria-hidden element. */
+  .hero-cue span {
+    animation: cue-breathe 2600ms var(--ease-calm) infinite;
+    transform-origin: top;
   }
 
   @media (hover: hover) {
@@ -302,10 +412,184 @@
         animation-range: cover 0% cover 100%;
       }
 
+      /* ---------------------------------------------------------------------------
+         The pinned Reigate Method — the page's one signature moment.
+         Desktop only: pinning a five-stage single-column stack on a phone is a very
+         long scroll for no gain, so small screens keep the static list.
+         Every rule here is additive. Remove this block and the markup collapses to
+         the ordinary five-column list, which is exactly the fallback.
+         -------------------------------------------------------------------------- */
+      @media (min-width: 64rem) {
+        .method-track {
+          view-timeline-name: --method-track;
+          /* 220vh, not 260: at 260 the page measured 13,106px, over the ~13,000 ceiling set
+             for scroll length. The stage ranges below are percentages of the `cover` range,
+             so they rescale with the track and the sequence still completes while pinned. */
+          height: 220vh;
+        }
+        .method-frame {
+          position: sticky;
+          top: var(--header-height, 4.5rem);
+          display: flex;
+          min-height: calc(100svh - var(--header-height, 4.5rem));
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        /* Transform only. A stage that never animates is merely offset, never invisible —
+           the lesson from the reveal that once stranded three sections at opacity 0. */
+        .method-stage {
+          animation: stage-rise linear both;
+          animation-timeline: --method-track;
+        }
+        .method-stage[data-stage="1"] {
+          animation-range: cover 26% cover 36%;
+        }
+        .method-stage[data-stage="2"] {
+          animation-range: cover 34% cover 44%;
+        }
+        .method-stage[data-stage="3"] {
+          animation-range: cover 42% cover 52%;
+        }
+        .method-stage[data-stage="4"] {
+          animation-range: cover 50% cover 60%;
+        }
+        .method-stage[data-stage="5"] {
+          animation-range: cover 58% cover 68%;
+        }
+
+        /* Each stage's rule fills as that stage arrives, sharing the stage's own range so
+           the fill and the lift are one gesture rather than two competing indicators. */
+        .method-rule {
+          animation: rule-fill linear both;
+          animation-timeline: --method-track;
+        }
+        .method-stage[data-stage="1"] .method-rule {
+          animation-range: cover 26% cover 36%;
+        }
+        .method-stage[data-stage="2"] .method-rule {
+          animation-range: cover 34% cover 44%;
+        }
+        .method-stage[data-stage="3"] .method-rule {
+          animation-range: cover 42% cover 52%;
+        }
+        .method-stage[data-stage="4"] .method-rule {
+          animation-range: cover 50% cover 60%;
+        }
+        .method-stage[data-stage="5"] .method-rule {
+          animation-range: cover 58% cover 68%;
+        }
+      }
+
+      /* ---------------------------------------------------------------------------
+         Scroll-scrubbed sequence: she walks down the steps as the page descends, and
+         back up them on the way up — free, because the animation is a function of
+         scroll position rather than a playhead that would need reversing.
+
+         `steps(24, jump-none)` is the important part: jump-none produces exactly 24
+         discrete values including both endpoints, so every step lands on a frame
+         boundary. Any other steps() variant drops a frame or lands between two.
+
+         Named timeline on the frame for the usual reason — the frame is overflow-hidden
+         and therefore its own scroll container, which would pin an anonymous view() at
+         a constant 50%.
+         -------------------------------------------------------------------------- */
+      .sequence-frame {
+        view-timeline-name: --sequence-frame;
+      }
+      .sequence-strip {
+        /* Exactly ONE timing function. `steps(...) linear` is two, which makes the whole
+           `animation` shorthand invalid and silently drops it — animation-name resolved to
+           `none` while the timeline and range longhands still applied, so it looked wired up.
+           The step count comes from the per-count rules below. */
+        animation: sequence-step both;
+        animation-timeline: --sequence-frame;
+        /* A single phase. Mixing `entry` and `cover` resolved to a range that was already
+           complete everywhere it was sampled — the same trap the journey thread hit. */
+        animation-range: cover 5% cover 75%;
+      }
+      /* `jump-none` yields exactly N discrete values including both endpoints, so every step
+         lands on a frame boundary. Other steps() variants drop a frame or land between two. */
+      .sequence-frame[data-frames="20"] .sequence-strip {
+        animation-timing-function: steps(20, jump-none);
+      }
+      .sequence-frame[data-frames="24"] .sequence-strip {
+        animation-timing-function: steps(24, jump-none);
+      }
+
+      /* Interludes get the deepest travel on the page. They are a full screen of photography
+         with nothing to read, so the motion is the only thing holding attention. Named
+         timeline on the frame for the usual reason: the frame is overflow-hidden and would
+         otherwise pin an anonymous view() at a constant 50%. */
+      .interlude-frame {
+        view-timeline-name: --interlude-frame;
+      }
+      /* Two animations on one element, comma-separated — the parallax drift on `translate`
+         and the push-in on `scale`, so the water advances as you descend while keeping the
+         drift. They have to share ONE `animation` declaration: two separate rules mean the
+         later silently replaces the earlier, which is how the hero layers were lost first
+         time round. The timeline and range lists need one entry per animation. */
+      .interlude-image {
+        animation:
+          interlude-drift linear both,
+          interlude-approach linear both;
+        animation-timeline: --interlude-frame, --interlude-frame;
+        animation-range:
+          cover 0% cover 100%,
+          cover 0% cover 100%;
+      }
+
       /* Same trap on the hero: its <section> is overflow-hidden, so `scroll()` resolved
          against the section rather than the page. Named timeline on the section. */
       .hero-frame {
         view-timeline-name: --hero-frame;
+      }
+
+      /* The hero's own elements separate as it leaves and converge coming back — the
+         "parts moving" gesture applied to composition rather than to a product, since this
+         brand has no object to take apart. Depth 1 travels furthest, 4 least. */
+      .hero-layer {
+        animation: hero-layer-lift linear both;
+        animation-timeline: --hero-frame;
+        animation-range: exit 0% exit 100%;
+      }
+      .hero-layer[data-depth="1"] {
+        --layer-shift: -6rem;
+      }
+      .hero-layer[data-depth="2"] {
+        --layer-shift: -4.25rem;
+      }
+      .hero-layer[data-depth="3"] {
+        --layer-shift: -2.75rem;
+      }
+      .hero-layer[data-depth="4"] {
+        --layer-shift: -1.25rem;
+      }
+
+      /* ---------------------------------------------------------------------------
+         The journey thread. One segment per band, each drawn on its OWN view timeline as
+         that band enters, chaining visually down the page.
+
+         Deliberately not a single page-length line on `scroll()`: that is a progress bar
+         rotated ninety degrees — it reports "you are 47% done" rather than saying anything
+         about the journey. Per-band segments read as the route continuing, carry no global
+         completion state, and reuse the same per-element timeline pattern as everything
+         else here. Decorative and aria-hidden, so free to scale from zero.
+         -------------------------------------------------------------------------- */
+      @media (min-width: 64rem) {
+        /* No `timeline-scope` — a descendant already sees an ancestor's view-timeline-name,
+           and scoping the same name on every band makes the lookup ambiguous. */
+        .journey-band {
+          view-timeline-name: --journey-band;
+        }
+        .journey-thread {
+          animation: journey-draw linear both;
+          animation-timeline: --journey-band;
+          /* A single phase, not `entry ... cover ...`. Mixing phases resolved to a range
+             that was already complete everywhere the thread was sampled. */
+          animation-range: cover 0% cover 45%;
+          transform-origin: top;
+        }
       }
       .hero-drift {
         animation: hero-zoom linear both;
@@ -339,11 +623,42 @@
   /* Scroll-linked motion is already gated behind prefers-reduced-motion: no-preference,
      so none of it applies here. This is the second line of defence for a mid-session
      preference change: nothing may be left displaced, undrawn, or off-frame. */
+  /* The pinning and every scroll animation are already gated behind
+     prefers-reduced-motion: no-preference, so none of this applies here. Second line of
+     defence for a mid-session preference change: nothing displaced, nothing left unfilled,
+     and the Method returns to ordinary flow rather than a 260vh sticky track. */
   .reveal,
   .reveal-stagger > *,
-  .editorial-image img {
+  .editorial-image img,
+  .interlude-image,
+  .method-stage,
+  .hero-layer,
+  /* Lands on frame 0 — an ordinary still of her at the top of the steps, never mid-stride. */
+  .sequence-strip {
     translate: none !important;
     animation: none !important;
+  }
+  /* The thread must be fully drawn, never half-drawn — a partial line implies broken
+     progress. The scroll cue stops breathing. */
+  .journey-thread {
+    animation: none !important;
+    scale: 1 1 !important;
+  }
+  .hero-cue span {
+    animation: none !important;
+    scale: 1 1 !important;
+  }
+  .method-track {
+    height: auto !important;
+  }
+  .method-frame {
+    position: static !important;
+    min-height: 0 !important;
+  }
+  /* Rules land fully drawn — a part-filled rule implies a step half-completed. */
+  .method-rule {
+    animation: none !important;
+    transform: scaleX(1) !important;
   }
   .horizon-rule path {
     stroke-dashoffset: 0 !important;

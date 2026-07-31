@@ -58,6 +58,41 @@ The approved Brand Book, Charter, and Fable storyboard files are **never edited*
   off a band, which is where a 3% step is an asset rather than a defect. No palette value changed;
   only which role each token plays at band level.
 
+## 5 — Offer-status labels: client direction vs. the stated non-negotiable
+
+- **Conflict.** `AGENTS.md` lists under non-negotiable constraints: *"Always show status as visible
+  **text**, not colour"*, and `.claude/rules/brand-and-content.md` names `StatusLabel` as the
+  mechanism. On 2026-07-28 the client directed that the "Available now" / "In development" chips be
+  removed, on the design grounds that the boxed treatment looked cheap. The concern was raised
+  explicitly — including that it breaks five test assertions and risks in-development offers reading
+  as bookable — and the client reaffirmed the decision.
+- **Resolution.** The chips are removed. Client direction governs their own site, and the residual
+  risk is smaller than it first appears because **status is still stated in prose**: homepage
+  section 2 carries the approved sentence *"Bespoke Travel Planning is available now. Community
+  Experiences and Curated Wellness Journeys are in development."* That sentence is now load-bearing
+  and is pinned by a test (`tests/e2e/homepage.spec.ts`), so it cannot be edited away silently.
+- **What still enforces the rule's intent.** The `status` field remains in the data model and still
+  drives `emphasis`; the current offer is the only one rendered with photography and a wide card,
+  the two in-development offers stay text-only and quieter. Both the unit and e2e suites now assert
+  that hierarchy directly rather than asserting the presence of a chip.
+- **To reverse:** restore `StatusLabel`, re-add it to `OfferCard` and the Bespoke section. The
+  `status` values never changed, so nothing else needs to move.
+
+## 6 — Two photographic interludes vs. the 11-section Fable storyboard
+
+- **Conflict.** The Fable storyboard defines eleven homepage sections and the build has followed it
+  exactly. This pass inserts two full-bleed photographic interludes — after the Bespoke act and
+  after the founder act — which are not in the storyboard.
+- **Resolution.** They carry **no copy, no CTA and nothing to read**, so they add no claim, no
+  content-safety surface, and nothing to approve; they exist purely to change tempo. All eleven
+  approved sections remain present, in order, with their copy untouched. The storyboard governs the
+  *narrative sequence*, and the narrative sequence is unchanged — an interlude is a pause between
+  beats, not a beat. Measured justification: before this pass every section sat between 0.72 and 1.2
+  viewports tall, which is why three prior passes of type, colour and motion work failed to register
+  as anything other than flat.
+- **To reverse:** delete the two `<Interlude>` calls in `src/app/page.tsx`. Nothing else depends on
+  them; the two images can stay in `public/images/` unused or be removed.
+
 ## Non-conflicts noted
 
 - No conflict between the Brand Book, Charter, and storyboard on offer status, palette, typography,

@@ -1,8 +1,6 @@
 import { Section } from "@/components/layout/Section";
 import { SectionIntro } from "@/components/content/SectionIntro";
 import { Button } from "@/components/ui/Button";
-import { StatusLabel } from "@/components/ui/StatusLabel";
-import type { OfferStatus } from "@/types/content";
 
 interface ShellPageProps {
   eyebrow: string;
@@ -10,7 +8,6 @@ interface ShellPageProps {
   lead: string;
   /** Extra approved/neutral paragraphs. */
   body?: string[];
-  status?: OfferStatus;
   primaryCta?: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
 }
@@ -25,13 +22,11 @@ export function ShellPage({
   heading,
   lead,
   body = [],
-  status,
   primaryCta,
   secondaryCta,
 }: ShellPageProps) {
   return (
     <Section surface="ivory" width="prose" aria-labelledby="shell-heading">
-      {status ? <StatusLabel status={status} className="mb-5" /> : null}
       <SectionIntro eyebrow={eyebrow} heading={heading} headingId="shell-heading" lead={lead} />
       {body.map((paragraph) => (
         <p key={paragraph} className="text-body text-ink/85 mt-4">

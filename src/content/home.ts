@@ -31,9 +31,18 @@ export const home = {
       "Bespoke Travel Planning is available now. Community Experiences and Curated Wellness Journeys are in development — and you're welcome to follow along as they take shape.", // [A]/[D]
     ],
     link: { label: "Read the Reigate story", href: "/about" },
+    // This section renders a scroll-scrubbed sequence rather than a still: the woman walks
+    // down the steps as the visitor descends the page, and back up on the way up. The frames
+    // were generated from `arched-doorway.png`, which stays in public/images as the source
+    // of frame 0 — `src` below points at the sprite strip that is actually rendered, so the
+    // content object does not claim an asset the page no longer uses.
     image: {
-      src: "/images/arched-doorway.png",
-      alt: "A view through an arched stone doorway toward a sunlit courtyard.",
+      src: "/images/stairs-sequence.jpg",
+      sourceStill: "/images/arched-doorway.png",
+      frames: 24,
+      frameWidth: 512,
+      frameHeight: 640,
+      alt: "A woman walks down stone steps through an arched doorway toward a sunlit bay.",
     },
   },
 
@@ -84,11 +93,25 @@ export const home = {
       "Reigate Community Experiences bring people together through movement, conversation, local partnerships, and shared moments designed to support living well.", // [A]
       "We're developing our first local gatherings now. There's nothing to register for yet — and we'd rather say that plainly than pretend otherwise. If you'd like to be invited when the first experience is confirmed, the Reigate community is the place to be.", // [D]
     ],
-    primaryCta: { label: "Join the Community", href: "#join" },
+    // Luma is the confirmed destination for community gatherings (verified 200, 2026-07-28).
+    // Read from site.social.luma rather than hardcoded — a single edit disables it if that
+    // ever changes, and `external` marks it as leaving the site for screen-reader users.
+    primaryCta: {
+      label: "Join the Community",
+      href: site.social.luma ?? "#join",
+      external: Boolean(site.social.luma),
+    },
     secondaryLink: { label: "About Community Experiences", href: "/community" },
+    // Scroll-scrubbed like the Reigate story section: the water moves and the sailboat
+    // drifts right-to-left toward the copy panel. Frames generated from `oakville-horizon.png`,
+    // which stays in public/images as the source of frame 0.
     image: {
-      src: "/images/oakville-horizon.png",
-      alt: "The Lake Ontario horizon seen from the Oakville waterfront.",
+      src: "/images/sailboat-sequence.jpg",
+      sourceStill: "/images/oakville-horizon.png",
+      frames: 20,
+      frameWidth: 1024,
+      frameHeight: 574,
+      alt: "A sailboat drifts across the Lake Ontario horizon seen from the Oakville waterfront.",
     },
   },
 

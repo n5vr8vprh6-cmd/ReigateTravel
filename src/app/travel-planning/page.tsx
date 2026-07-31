@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 export default function TravelPlanningPage() {
   return (
     <ShellPage
-      status="available"
       eyebrow="Bespoke Travel Planning"
       heading="Travel designed around how you want to feel."
       lead="Bespoke Travel Planning begins with how you want the journey to feel. Reigate turns your priorities, preferences, and ideas into a thoughtfully coordinated travel experience designed around you."

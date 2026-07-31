@@ -102,6 +102,157 @@ test.describe("Scroll motion never hides content", () => {
     }
   });
 
+  // The Method is the page's one pinned moment. Pinning is a progressive enhancement: the five
+  // stages must be present, readable and in order whether or not it engages. A stranded pinned
+  // section is far worse than a missing effect, and this project has already shipped a reveal
+  // that left content invisible once.
+  test("the pinned Method sequence still presents all five stages, in order", async ({ page }) => {
+    await homepage(page);
+    const names = await page.$$eval(".method-stage h3", (els) =>
+      els.map((el) => el.textContent?.trim())
+    );
+    expect(names).toEqual(["Listen", "Define", "Curate", "Support", "Remember"]);
+
+    // Every stage has real rendered size — a collapsed sticky track would zero these.
+    const heights = await page.$$eval(".method-stage", (els) =>
+      els.map((el) => Math.round(el.getBoundingClientRect().height))
+    );
+    expect(heights.every((h) => h > 40)).toBe(true);
+  });
+
+  test("Method stages are never invisible, only offset", async ({ page }) => {
+    await homepage(page);
+    const opacities = await page.$$eval(".method-stage, .method-stage *", (els) =>
+      els.map((el) => parseFloat(getComputedStyle(el).opacity))
+    );
+    expect(opacities.every((o) => o >= 0.5)).toBe(true);
+  });
+
+  test("under reduced motion the Method is static flow, not a sticky track", async ({
+    browser,
+  }) => {
+    const ctx = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await ctx.newPage();
+    await homepage(page);
+
+    const state = await page.evaluate(() => {
+      const track = document.querySelector<HTMLElement>(".method-track")!;
+      const frame = document.querySelector<HTMLElement>(".method-frame")!;
+      return {
+        framePosition: getComputedStyle(frame).position,
+        // A 220vh track would dwarf the viewport; static flow should be far shorter.
+        trackVh: track.getBoundingClientRect().height / window.innerHeight,
+        stageOffsets: [...document.querySelectorAll(".method-stage")].map((el) => {
+          const t = getComputedStyle(el).translate;
+          return t === "none" ? 0 : parseFloat(t.trim().split(/\s+/)[1] ?? "0");
+        }),
+      };
+    });
+
+    expect(state.framePosition).not.toBe("sticky");
+    expect(state.trackVh).toBeLessThan(2);
+    expect(state.stageOffsets.every((v) => Math.abs(v) < 0.5)).toBe(true);
+    await ctx.close();
+  });
+
+  // Read the `scale` PROPERTY, not `transform`. The thread animates `scale`, so
+  // `DOMMatrix(getComputedStyle(el).transform)` returns identity and every reading looks
+  // like 1 — which is exactly how this was first mis-measured.
+  const scaleY = (raw: string) => {
+    if (raw === "none") return 1;
+    const parts = raw.trim().split(/\s+/);
+    return parseFloat(parts[1] ?? parts[0]);
+  };
+
+  test("the journey thread is fully drawn under reduced motion, never half-drawn", async ({
+    browser,
+  }) => {
+    const ctx = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await ctx.newPage();
+    await homepage(page);
+    const scales = await page.$$eval(".journey-thread", (els) =>
+      els.map((el) => getComputedStyle(el).scale)
+    );
+    expect(scales.length).toBeGreaterThan(3);
+    // A partially drawn line implies broken progress, so reduced motion must land on 1, not 0.
+    for (const raw of scales) expect(scaleY(raw)).toBeCloseTo(1, 2);
+    await ctx.close();
+  });
+
+  test("hero copy layers are never displaced at the top of the page", async ({ page }) => {
+    await homepage(page);
+    // The separation is an exit effect: at scroll 0 every layer must be exactly in place,
+    // otherwise the first thing a visitor sees is a misaligned composition.
+    const offsets = await page.$$eval(".hero-layer", (els) =>
+      els.map((el) => {
+        const t = getComputedStyle(el).translate;
+        return t === "none" ? 0 : parseFloat(t.trim().split(/\s+/)[1] ?? "0");
+      })
+    );
+    expect(offsets.length).toBe(4);
+    for (const v of offsets) expect(Math.abs(v)).toBeLessThan(0.5);
+  });
+
+  test("no video ships with the page", async ({ page }) => {
+    const media: string[] = [];
+    page.on("response", (r) => {
+      if (/\.(mp4|webm|mov)(\?|$)/.test(r.url())) media.push(r.url());
+    });
+    await homepage(page);
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(600);
+    expect(media, "the hero video was removed so every motion answers to scroll").toEqual([]);
+    expect(await page.locator("video").count()).toBe(0);
+  });
+
+  // The scroll-scrubbed sequence in the Reigate story section. `translate` here is a
+  // PERCENTAGE of the strip's own height — one frame is 100/24. Reading it as pixels makes
+  // every frame look like 0, which is exactly how this was first mis-measured.
+  const frameIndex = (translate: string, frames = 24) => {
+    if (translate === "none") return 0;
+    const pct = parseFloat(translate.trim().split(/\s+/)[1] ?? "0");
+    return Math.round(-pct / (100 / frames));
+  };
+
+  test("the stairs sequence steps through frames as the page scrolls", async ({ page }) => {
+    await homepage(page);
+    await page.addStyleTag({ content: "html{scroll-behavior:auto !important}" });
+    const top = await page.evaluate(() =>
+      Math.round(
+        document.querySelector(".sequence-frame")!.getBoundingClientRect().top + window.scrollY
+      )
+    );
+    const read = async (y: number) => {
+      await page.evaluate((yy) => window.scrollTo(0, yy), y);
+      await page.waitForTimeout(380);
+      return frameIndex(
+        await page.$eval(".sequence-strip", (el) => getComputedStyle(el).translate)
+      );
+    };
+
+    const down = [await read(top - 950), await read(top - 450), await read(top + 250)];
+    // Frames must actually advance, not sit on one.
+    expect(new Set(down).size).toBeGreaterThan(1);
+    expect(down[0]).toBeLessThan(down[2]);
+
+    // ...and walk back up symmetrically, because the animation is a function of position.
+    expect(await read(top - 450)).toBe(down[1]);
+    expect(await read(top - 950)).toBe(down[0]);
+  });
+
+  test("the stairs sequence rests on a whole frame, never mid-stride", async ({ browser }) => {
+    const ctx = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await ctx.newPage();
+    await homepage(page);
+    await page.evaluate(() => window.scrollTo(0, 1400));
+    await page.waitForTimeout(400);
+    const t = await page.$eval(".sequence-strip", (el) => getComputedStyle(el).translate);
+    // Without the animation the strip must sit exactly on frame 0 — a partial offset would
+    // show two half-frames stitched together.
+    expect(t === "none" || parseFloat(t.trim().split(/\s+/)[1] ?? "0") === 0).toBe(true);
+    await ctx.close();
+  });
+
   test("reduced motion leaves everything settled and readable", async ({ browser }) => {
     const ctx = await browser.newContext({ reducedMotion: "reduce" });
     const page = await ctx.newPage();

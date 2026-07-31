@@ -17,13 +17,26 @@ test.describe("Homepage — narrative + conversions", () => {
 
   test("communicates offer status: Bespoke available, two in development", async ({ page }) => {
     await page.goto("/");
-    // Scope to the status chips (exact text) — the explanation sentence also contains
-    // the phrase "in development", which is correct copy, not a status label.
-    await expect(page.getByText("Available now", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("In development", { exact: true })).toHaveCount(2);
+    // The status chips were removed at the client's direction (decision-log #31), so the
+    // page now carries this in prose instead. That sentence is load-bearing: it is the only
+    // place a visitor is told the other two offers are not yet bookable. If it is ever
+    // edited away, this fails — which is the point.
+    await expect(
+      page.getByText(
+        /Bespoke Travel Planning is available now\. Community Experiences and Curated Wellness Journeys are in development/
+      )
+    ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Bespoke Travel Planning" }).first()
     ).toBeVisible();
+  });
+
+  test("in-development offers stay visually subordinate to the current offer", async ({ page }) => {
+    await page.goto("/");
+    const ecosystem = page.locator("section:has(#ecosystem-heading)");
+    // The current offer is the only one carrying photography in the ecosystem grid.
+    await expect(ecosystem.locator("article img")).toHaveCount(1);
+    await expect(ecosystem.locator("article")).toHaveCount(3);
   });
 
   test("renders the five Reigate Method stages in order", async ({ page }) => {

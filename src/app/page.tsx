@@ -1,9 +1,7 @@
-import Image from "next/image";
 import { Section } from "@/components/layout/Section";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
 import { TextLink } from "@/components/ui/TextLink";
-import { StatusLabel } from "@/components/ui/StatusLabel";
 import { EditorialImage } from "@/components/ui/EditorialImage";
 import { CTAPanel } from "@/components/ui/CTAPanel";
 import { EditorialHero } from "@/components/content/EditorialHero";
@@ -14,6 +12,8 @@ import { ProcessSteps } from "@/components/content/ProcessSteps";
 import { FounderFeature } from "@/components/content/FounderFeature";
 import { ArticleCard } from "@/components/content/ArticleCard";
 import { NewsletterSignup } from "@/components/content/NewsletterSignup";
+import { Interlude } from "@/components/content/Interlude";
+import { ScrollSequence } from "@/components/content/ScrollSequence";
 import { home } from "@/content/home";
 import { offers } from "@/content/offers";
 import { featuredArticles } from "@/content/articles";
@@ -48,11 +48,17 @@ export default function HomePage() {
               <TextLink href={home.explanation.link.href}>{home.explanation.link.label}</TextLink>
             </div>
           </div>
-          <EditorialImage
+          {/* Scroll-scrubbed: she walks down the steps toward the water as the visitor
+              descends the page, and back up them scrolling up. 24 frames in one strip,
+              stepped by a scroll timeline — no JavaScript, and no playhead to reverse.
+              See decision-log.md #46. */}
+          <ScrollSequence
             src={home.explanation.image.src}
             alt={home.explanation.image.alt}
-            ratio="portrait"
-            className="lg:order-last"
+            frames={home.explanation.image.frames}
+            frameWidth={home.explanation.image.frameWidth}
+            frameHeight={home.explanation.image.frameHeight}
+            className="rounded-sm lg:order-last"
             sizes="(max-width: 1024px) 100vw, 45vw"
           />
         </div>
@@ -81,7 +87,6 @@ export default function HomePage() {
             sizes="(max-width: 1024px) 100vw, 55vw"
           />
           <div className="max-w-[36rem]">
-            <StatusLabel status="available" className="mb-5" />
             <h2 id="bespoke-heading" className="text-h2">
               {home.bespoke.heading}
             </h2>
@@ -99,17 +104,32 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* 5 — The Reigate Method (process proof) */}
+      {/* Interlude — a full screen of coastline between the commercial act and the method.
+          No copy, no CTA, nothing to read: it exists to change the page's tempo. See
+          docs/decisions/decision-log.md #36. */}
+      <Interlude src="/images/mediterranean-coastline.png" position="50% 55%" />
+
+      {/* 5 — The Reigate Method (process proof). The page's pinned moment — the frame holds
+          while the five stages advance. Earned rather than decorative: these stages are a
+          real sequence and the order carries meaning. Static five-column list everywhere
+          the pinning does not apply. */}
       <Section surface="sand" aria-labelledby="method-heading">
-        <div className="max-w-[44rem]">
-          <SectionIntro
-            eyebrow={home.method.eyebrow}
-            heading={home.method.heading}
-            headingId="method-heading"
-            size="statement"
-          />
+        {/* The track and frame enclose the heading as well as the stages. Pinning the stages
+            alone left five floating labels with no context once the heading scrolled past the
+            sticky frame — the whole composition has to hold together. */}
+        <div className="method-track">
+          <div className="method-frame">
+            <div className="max-w-[44rem]">
+              <SectionIntro
+                eyebrow={home.method.eyebrow}
+                heading={home.method.heading}
+                headingId="method-heading"
+                size="statement"
+              />
+            </div>
+            <ProcessSteps />
+          </div>
         </div>
-        <ProcessSteps />
       </Section>
 
       {/* 6 — Connected ecosystem */}
@@ -148,15 +168,18 @@ export default function HomePage() {
         {/* Copper hairline marking the page's one structural break. The accent earns its
             place here rather than being sprinkled; it is decorative and carries no meaning. */}
         <div aria-hidden="true" className="bg-copper/70 h-px w-full" />
-        <div className="relative h-[38vh] min-h-[15rem] w-full overflow-hidden lg:h-[30rem]">
-          <Image
-            src={home.community.image.src}
-            alt={home.community.image.alt}
-            fill
-            sizes="100vw"
-            className="object-cover object-center"
-          />
-        </div>
+        {/* Scroll-scrubbed: the water moves and the sailboat drifts right-to-left, toward
+            the copy panel that overlaps this band. 20 frames stepped by scroll — the band's
+            height is derived from the frame aspect rather than set in vh, because the window
+            has to be exactly one frame tall or the next frame bleeds in underneath. */}
+        <ScrollSequence
+          src={home.community.image.src}
+          alt={home.community.image.alt}
+          frames={home.community.image.frames}
+          frameWidth={home.community.image.frameWidth}
+          frameHeight={home.community.image.frameHeight}
+          sizes="100vw"
+        />
         <Container className="pb-[var(--spacing-section)]">
           <div className="bg-surface relative -mt-12 max-w-[40rem] p-8 sm:p-10 lg:-mt-28 lg:p-12">
             <SectionIntro heading={home.community.heading} headingId="community-heading" />
@@ -166,7 +189,14 @@ export default function HomePage() {
               </p>
             ))}
             <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center">
-              <Button href={home.community.primaryCta.href} variant="primary">
+              <Button
+                href={home.community.primaryCta.href}
+                variant="primary"
+                external={home.community.primaryCta.external}
+                accessibleLabel={
+                  home.community.primaryCta.external ? "Join the Community on Luma" : undefined
+                }
+              >
                 {home.community.primaryCta.label}
               </Button>
               <TextLink href={home.community.secondaryLink.href}>
@@ -184,37 +214,58 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* 9 — Travel Notes */}
-      <Section surface="sand" aria-labelledby="travel-notes-heading">
-        <div className="max-w-[44rem]">
-          <SectionIntro
-            heading={home.travelNotes.heading}
-            headingId="travel-notes-heading"
-            lead={home.travelNotes.subheading}
-            size="sm"
-          />
-        </div>
-        {featuredArticles.length > 0 ? (
-          <div className="mt-10 grid gap-8 md:grid-cols-3">
-            {featuredArticles.slice(0, 3).map((article) => (
-              <ArticleCard key={article.url} article={article} />
-            ))}
-          </div>
-        ) : (
-          // Neutral state — no approved articles yet (never fabricate cards).
-          <div className="mt-8 max-w-[40rem]">
-            <p className="text-body text-ink/80">{home.travelNotes.emptyState}</p>
-            <div className="mt-6">
+      {/* Interlude — the second tempo change, after the founder act and before the closing
+          beats. Warmer and more intimate than the coastline, so the two are not the same
+          gesture repeated. */}
+      <Interlude src="/images/outdoor-table.png" position="50% 45%" />
+
+      {/* 9 — Travel Notes. Was heading + paragraph + button on a flat band, which read as an
+          afterthought. The empty state is inherently thin — there are no approved articles yet
+          and none may be invented — so the section earns its presence from art direction
+          instead: a tall photograph bleeding out to the right gutter, with the copy held on a
+          narrow measure beside it. Mirrors the Bespoke bleed in the other direction so the two
+          asymmetries read as a system rather than a repeated trick. */}
+      <Section surface="sand" size="sm" aria-labelledby="travel-notes-heading">
+        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+          <div className="reveal max-w-[34rem]">
+            <SectionIntro
+              heading={home.travelNotes.heading}
+              headingId="travel-notes-heading"
+              lead={home.travelNotes.subheading}
+              size="sm"
+            />
+            {featuredArticles.length > 0 ? null : (
+              // Neutral state — no approved articles yet (never fabricate cards).
+              <p className="text-body text-ink/80 mt-6">{home.travelNotes.emptyState}</p>
+            )}
+            <div className="mt-7">
               <Button href="/travel-notes" variant="secondary">
                 {home.travelNotes.readAllLabel}
               </Button>
             </div>
           </div>
-        )}
+
+          <EditorialImage
+            src="/images/botanical-shadow.png"
+            /* Decorative: this is texture and mood, not information the copy depends on. */
+            alt=""
+            ratio="portrait"
+            className="lg:-mr-[max(1.5rem,calc((100vw-var(--container-content))/2))] lg:w-[calc(100%+max(1.5rem,calc((100vw-var(--container-content))/2)))]"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
+        </div>
+
+        {featuredArticles.length > 0 ? (
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
+            {featuredArticles.slice(0, 3).map((article) => (
+              <ArticleCard key={article.url} article={article} />
+            ))}
+          </div>
+        ) : null}
       </Section>
 
       {/* 10 — Tyler Takes Off invitation */}
-      <Section surface="ivory" aria-label="Join the community">
+      <Section surface="ivory" size="sm" aria-label="Join the community">
         <div id="join" className="scroll-mt-[var(--header-height,4.5rem)]">
           <NewsletterSignup />
         </div>

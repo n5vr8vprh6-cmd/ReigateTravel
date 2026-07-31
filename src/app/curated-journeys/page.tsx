@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 export default function CuratedJourneysPage() {
   return (
     <ShellPage
-      status="in-development"
       eyebrow="Curated Wellness Journeys"
       heading="Small-group journeys, shaped with intention."
       lead="Curated Wellness Journeys are thoughtfully designed small-group experiences that bring together wellbeing, culture, connection, and time to explore at a more intentional pace."
