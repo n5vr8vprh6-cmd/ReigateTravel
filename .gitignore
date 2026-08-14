@@ -40,3 +40,10 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# agent-skill installs — vendored third-party source, restored from skills-lock.json
+# rather than committed, the same way node_modules is restored from package-lock.json.
+# skills-lock.json IS tracked: it pins the versions. `.claude/rules` is project-authored
+# and stays tracked; only the installed skills under `.claude/skills` are ignored.
+/.agents/
+/.claude/skills/
