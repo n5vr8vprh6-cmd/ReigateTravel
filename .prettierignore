@@ -7,3 +7,11 @@ docs
 *.pdf
 *.docx
 package-lock.json
+
+# Vendored agent-skill installs and their lockfile. Third-party source, not this
+# project's code — formatting it would rewrite files we do not own, and it is what
+# made `npm run verify` fail at format:check. `.claude/rules` is deliberately NOT
+# ignored: those are project-authored and should stay formatted.
+.agents
+.claude/skills
+skills-lock.json

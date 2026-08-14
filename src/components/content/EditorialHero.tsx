@@ -20,6 +20,12 @@ import { home } from "@/content/home";
  * visitor. It is gone (−6.3MB, one fewer client component). In its place the hero's own
  * elements separate at different rates as it exits, on the same `--hero-frame` view timeline
  * as the photograph's push-in, so the whole thing reassembles exactly in reverse on scroll-up.
+ *
+ * `bg-ink` on the section is the structural dark ground. Every dark pixel here otherwise comes from
+ * the photograph and the -z-10 scrim, and neither of those is an *ancestor* background — so
+ * resolving the ancestor chain for an opaque colour lands on body's Ivory, which puts the Ivory
+ * copy at 1.0:1. It renders identically today. What it buys is that the contrast guarantee survives
+ * any state where the image or the scrim does not paint, rather than depending on both.
  */
 export function EditorialHero() {
   const { eyebrow, heading, body, primaryCta, secondaryCta, image } = home.hero;
@@ -28,7 +34,7 @@ export function EditorialHero() {
     <section
       aria-labelledby="hero-heading"
       data-surface="inverse"
-      className="hero-frame relative isolate flex min-h-[100svh] items-end overflow-hidden"
+      className="hero-frame bg-ink relative isolate flex min-h-[100svh] items-end overflow-hidden"
     >
       <Image
         src={image.src}

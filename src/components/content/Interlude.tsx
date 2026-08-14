@@ -23,10 +23,15 @@ interface InterludeProps {
  *
  * Rendered as a plain <div>, not a <section>: it has no heading and no accessible name, so making
  * it a sectioning element would add an unlabelled region to the document outline for no benefit.
+ *
+ * `bg-sand` is the loading ground, and it is not optional. This is a full-viewport image that
+ * lazy-loads, and a cold next/image optimisation of a ~2MB source measured over 3s — long enough
+ * that without a ground the visitor scrolls into a full screen of nothing. EditorialImage and
+ * ScrollSequence both carry the same fallback; this was the one image component missing it.
  */
 export function Interlude({ src, alt = "", position = "center" }: InterludeProps) {
   return (
-    <div className="interlude-frame relative isolate h-[100svh] w-full overflow-hidden">
+    <div className="interlude-frame bg-sand relative isolate h-[100svh] w-full overflow-hidden">
       <Image
         src={src}
         alt={alt}
