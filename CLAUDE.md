@@ -27,7 +27,10 @@ has no console errors before reporting done — don't ask the user to check manu
 ## Guardrails specific to this repo
 
 - No deploy, push, branch changes, DNS, or external-account changes without explicit approval.
-- No email provider is approved: never simulate a successful inquiry submission.
+- Resend is the approved email provider (decision-log #54). The other half of that rule still
+  stands: **never simulate a successful submission.** If delivery fails, render the error state
+  and the direct-email fallback. With the delivery env vars unset the form does not render at
+  all and `/begin-planning` falls back to the approved mailto path.
 - Community section stays in **State B** (philosophy + Substack invitation) until a real event with
   full details is supplied. Never fabricate an event.
 - Travel Notes renders a neutral Substack invitation until three approved articles exist. Never

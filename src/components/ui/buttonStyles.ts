@@ -1,0 +1,37 @@
+export type ButtonVariant = "primary" | "secondary";
+
+/**
+ * Shared button appearance, lifted out of `Button` so the submit button in the inquiry form
+ * cannot drift from the link buttons everywhere else. One definition, two components: `Button`
+ * renders a link, `ActionButton` renders a `<button>`.
+ *
+ * The contrast reasoning below is load-bearing and was measured, not estimated.
+ */
+export const buttonBase =
+  "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-sm px-6 py-3 " +
+  "font-sans text-[0.9375rem] font-semibold tracking-wide btn-motion " +
+  "focus-visible:outline-3 " +
+  // A real pressed state. `translate` rather than `transform` so it never fights the
+  // scroll-linked transforms elsewhere, and it moves no neighbouring layout.
+  "active:translate-y-px";
+
+export const buttonVariants: Record<"default" | "inverse", Record<ButtonVariant, string>> = {
+  default: {
+    // Ink fill / Ivory text on Ivory / Sand backgrounds. AA contrast.
+    primary: "bg-ink text-ivory hover:bg-olive",
+    // Outlined, so the border is the only thing identifying this as a control — which puts it
+    // under WCAG 2.2 SC 1.4.11 and its 3:1 floor, measured against the band behind it.
+    //   ink/40 was 2.45:1 on Ivory and 2.31:1 on Sand — under the floor on both.
+    //   ink/55 is  3.75:1 on Ivory and 3.39:1 on Sand — clears both with the palette untouched.
+    // Hover firms to Olive (8.75:1 / 6.37:1). It used to firm to Copper, which measured 2.46:1 on
+    // Ivory and 1.79:1 on Sand — the affordance got *weaker* on interaction. Copper still does
+    // real work here, as the ink/5 wash's companion elsewhere on the page; it just cannot be the
+    // thing carrying the boundary. Contrast of the label itself is carried by Ink, as before.
+    secondary: "border border-ink/55 text-ink hover:border-olive hover:bg-ink/5",
+  },
+  inverse: {
+    // On the Olive band: Ivory fill / Ink text.
+    primary: "bg-ivory text-ink hover:bg-sand",
+    secondary: "border border-ivory/50 text-ivory hover:border-ivory hover:bg-ivory/10",
+  },
+};

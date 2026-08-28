@@ -2,36 +2,55 @@ import type { Metadata } from "next";
 import { Section } from "@/components/layout/Section";
 import { SectionIntro } from "@/components/content/SectionIntro";
 import { Button } from "@/components/ui/Button";
+import { InquiryForm } from "@/components/forms/InquiryForm";
+import { emailConfigured } from "@/lib/email/config";
+import { inquiryCopy } from "@/content/inquiry";
 import { site } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Begin Planning",
-  description: "Start a conversation with Reigate about the journey you're considering.",
+  description:
+    "Tell us what you are considering. A short guided inquiry so Tyler can understand what matters to you before you speak.",
 };
 
 /**
- * Milestone-1 shell. The guided inquiry form and its secure delivery are a later milestone;
- * no email provider is approved, so we do NOT simulate a submission. We offer the approved
- * business inquiry email as the honest interim path.
+ * The guided inquiry — Charter §10, and the site's primary conversion.
+ *
+ * The form only renders when delivery is actually configured. With no Resend key the page
+ * falls back to the approved mailto path rather than showing a submit button that cannot
+ * honour itself: CLAUDE.md's standing rule is that a submission is never simulated, and a
+ * form that silently discards an inquiry is the worst version of simulating one.
  */
 export default function BeginPlanningPage() {
   return (
-    <Section surface="ivory" width="prose" aria-labelledby="begin-heading">
+    <Section surface="ivory" width="prose" aria-labelledby="begin-planning-heading">
       <SectionIntro
-        eyebrow="Begin Planning"
-        heading="Tell us what you're considering."
-        headingId="begin-heading"
-        lead="Your answers help Tyler understand what matters to you and whether Reigate is the right planning partner. The guided inquiry is on its way."
+        as="h1"
+        eyebrow={inquiryCopy.eyebrow}
+        heading={inquiryCopy.heading}
+        headingId="begin-planning-heading"
+        lead={emailConfigured ? inquiryCopy.lead : undefined}
+        size="statement"
       />
-      <p className="text-body text-ink/85 mt-4">
-        In the meantime, you can start the conversation directly by email. Tyler typically replies
-        within {site.inquiryResponseTime}.
-      </p>
-      <div className="mt-8">
-        <Button href={`mailto:${site.inquiryEmail}`} variant="primary" external>
-          Email {site.inquiryEmail}
-        </Button>
-      </div>
+
+      {emailConfigured ? (
+        <div className="mt-12">
+          <InquiryForm />
+        </div>
+      ) : (
+        <div className="mt-8">
+          <p className="text-body text-ink/85 max-w-[38rem]">
+            The guided inquiry is not accepting submissions just yet. In the meantime the fastest
+            route is a direct email — Tyler reads every one, and typically replies within{" "}
+            {site.inquiryResponseTime}.
+          </p>
+          <div className="mt-8">
+            <Button href={`mailto:${site.inquiryEmail}`} variant="primary" external>
+              Email {site.inquiryEmail}
+            </Button>
+          </div>
+        </div>
+      )}
     </Section>
   );
 }

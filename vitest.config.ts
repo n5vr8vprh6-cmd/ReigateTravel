@@ -8,7 +8,9 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./tests/setup.ts"],
-    include: ["tests/unit/**/*.test.{ts,tsx}"],
+    // tests/forms is a Charter-reserved directory (§15). Without it in this glob the form
+    // tests are typechecked by tsc but never executed by vitest, which looks like passing.
+    include: ["tests/{unit,forms}/**/*.test.{ts,tsx}"],
   },
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },

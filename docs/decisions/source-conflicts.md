@@ -93,6 +93,30 @@ The approved Brand Book, Charter, and Fable storyboard files are **never edited*
 - **To reverse:** delete the two `<Interlude>` calls in `src/app/page.tsx`. Nothing else depends on
   them; the two images can stay in `public/images/` unused or be removed.
 
+## 7 — Rate limiting: a required control vs. the approved architecture
+
+- **Conflict.** Charter 13 lists **rate limiting** among the required controls for inquiry
+  delivery. Charter 14 mandates a Vercel serverless deployment. On serverless there is no shared
+  memory between instances, so the usual in-process limiter cannot actually enforce a limit: Vercel
+  runs many instances across regions and recycles them on cold start.
+- **What shipped.** Layered, bounded, best-effort controls in `src/lib/forms/rate-limit.ts` and
+  `src/lib/forms/spam.ts`: a honeypot, a minimum time-to-submit, two per-client sliding windows
+  (3 per 15 minutes, 10 per 24 hours) keyed by a salted hash of the forwarding address, and a
+  global cap of 40 sends per instance per hour so any bypass has a bounded blast radius. Resend's
+  own 10 requests/second is a further backstop.
+- **What this does not do, stated plainly.** The windows live in one instance's memory. An attacker
+  who bursts, or whose requests simply land on fresh instances, walks through them. This is a speed
+  bump against naive repetition, not a control against a determined attacker. It is described that
+  way in the module's own header comment so nobody later mistakes it for enforcement.
+- **Why not a shared store.** Upstash has a REST API, so it would cost no dependency. What it costs
+  is infrastructure: an account, a fourth secret, and a service that can be down — at which point
+  the choice is fail-open, losing the control, or fail-closed, losing real inquiries. For a form
+  that has not yet received a submission, that is premature.
+- **Escalation path, documented rather than built.** If abuse appears, the better answer is a Vercel
+  Firewall rate-limit rule on `/begin-planning`: dashboard-configured, no code, no dependency, and
+  enforced at the edge before the function runs. That is strictly better than a shared store for
+  this shape of problem, which is why no code was written for it now.
+
 ## Non-conflicts noted
 
 - No conflict between the Brand Book, Charter, and storyboard on offer status, palette, typography,

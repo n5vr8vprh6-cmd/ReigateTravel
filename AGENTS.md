@@ -39,11 +39,11 @@ Playwright runs against `next start` on port 3100 (see `playwright.config.ts`); 
 ## Repository layout
 
 - `src/app` — routes (RSC), `layout.tsx`, `robots.ts`, `sitemap.ts`, error/not-found/loading.
-- `src/components` — `layout/`, `navigation/`, `ui/` (primitives), `content/` (section components).
+- `src/components` — `layout/`, `navigation/`, `ui/` (primitives), `content/` (section components), `forms/` (the guided inquiry).
 - `src/content` — typed local content (`site.ts`, `home.ts`, `offers.ts`, `method.ts`, `navigation.ts`, `articles.ts`). No CMS.
-- `src/lib` — `cn.ts`, `seo.ts`. `src/types` — shared content types. `src/styles/globals.css` — design tokens.
+- `src/lib` — `cn.ts`, `seo.ts`, `email/`, `forms/`, `validation/`. `src/types` — shared content types. `src/styles/globals.css` — design tokens.
 - `public/brand`, `public/images` — approved assets only. `docs/` — charter, strategy, decisions, qa, assets.
-- `tests/` — `unit/` (vitest), `e2e/` + `a11y/` (playwright).
+- `tests/` — `unit/` + `forms/` (vitest), `e2e/` + `a11y/` (playwright).
 
 ## Non-negotiable constraints
 
@@ -58,9 +58,10 @@ Playwright runs against `next start` on port 3100 (see `playwright.config.ts`); 
   Do not expand "WTA", add numbers, or show certification logos.
 - **Assets**: use approved source files only. Never redraw/recolour/crop/stretch the logo. AI
   imagery is conceptual/editorial only — never documentary proof, and never for Tyler.
-- **Integrations**: read external URLs from `src/content/site.ts`; never hardcode/guess. No email
-  provider is approved — do not simulate inquiry submission. Substack/Luma are the sources of truth
-  for articles/events; do not rebuild them.
+- **Integrations**: read external URLs from `src/content/site.ts`; never hardcode/guess. Resend is
+  the approved email provider; delivery addresses come from env vars, never from committed code, and
+  a submission is **never simulated** — a failed send shows the error state, not a confirmation.
+  Substack/Luma are the sources of truth for articles/events; do not rebuild them.
 - **Accessibility**: WCAG 2.2 AA. Semantic landmarks, one H1, visible focus, keyboard-operable,
   reduced-motion honoured, meaningful alt text, no colour-only meaning. Review from 390px.
 - **Design**: use the tokens in `src/styles/globals.css`. Ink/Olive body text on Ivory/White/Sand

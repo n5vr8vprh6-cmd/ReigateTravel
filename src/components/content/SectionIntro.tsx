@@ -24,8 +24,12 @@ interface SectionIntroProps {
   className?: string;
   /** Visual weight of the heading — not its level. */
   size?: Size;
-  /** Heading level — one H1 per page lives in the hero, so sections use h2 by default. */
-  as?: "h2" | "h3";
+  /**
+   * Heading level. The homepage H1 lives in the hero, so sections default to h2 — but a
+   * standalone route needs its own H1, and until the inquiry form there was no page besides
+   * the homepage that had one.
+   */
+  as?: "h1" | "h2" | "h3";
 }
 
 /** Reusable heading cluster: eyebrow rule + heading + optional lead. */
