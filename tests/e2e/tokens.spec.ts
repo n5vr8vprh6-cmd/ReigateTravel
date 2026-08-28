@@ -1,7 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
 
 /**
- * The document streams `loading.tsx` inside <main> first and swaps in the real sections after.
+ * The homepage renders its sections directly now, so a selector resolves against the real
+ * content rather than a Suspense fallback.
  * Querying with $eval straight after goto() therefore races the stream — it can measure the
  * loading fallback instead of the page. Always wait for the last section to exist.
  */

@@ -274,9 +274,8 @@ test.describe("Scroll motion never hides content", () => {
 });
 
 /*
- * Not covered here: rendering with JavaScript disabled. `src/app/loading.tsx` puts the
- * homepage behind a Suspense boundary, so the served HTML holds the real content in a hidden
- * template and relies on inline scripts to swap it into <main>. With JS off the page shows
- * only "Loading…". That is the app shell, not the motion system, and it predates this work —
- * recorded as finding T1 in docs/decisions/missing-inputs.md.
+ * Rendering with JavaScript disabled is covered in `no-js.spec.ts`. It used to be a known
+ * gap here: `src/app/loading.tsx` put every route behind a Suspense boundary, so with JS off
+ * the page showed only "Loading…". That file has been removed and the behaviour is now
+ * asserted rather than noted.
  */

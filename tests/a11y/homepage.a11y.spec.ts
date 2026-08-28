@@ -13,8 +13,9 @@ for (const { name, width, height } of widths) {
   }) => {
     await page.setViewportSize({ width, height });
     await page.goto("/");
-    // The document streams loading.tsx into <main> first; wait for the real last section to be
-    // visible (attached resolves too early — the content is attached in a hidden template first).
+    // Wait for the real last section before scanning. Kept after the Suspense boundary was
+    // removed: it is a cheap guard that the page has finished painting, and `visible` still
+    // means something `attached` does not.
     await page.waitForSelector("#final-cta-heading", { state: "visible" });
 
     // Drive every scroll reveal to completion before scanning. axe samples whatever frame it
