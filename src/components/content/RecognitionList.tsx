@@ -13,7 +13,7 @@ interface RecognitionListProps {
  */
 export function RecognitionList({ statements }: RecognitionListProps) {
   return (
-    <ul className="mt-8">
+    <ul className="reveal-stagger mt-8">
       {statements.map((statement) => (
         <li
           key={statement}

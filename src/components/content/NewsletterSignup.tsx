@@ -33,7 +33,7 @@ export function NewsletterSignup() {
               href={substack}
               target="_blank"
               rel="noopener noreferrer"
-              className="decoration-taupe hover:decoration-copper font-semibold underline underline-offset-4"
+              className="decoration-taupe hover:decoration-copper link-motion font-semibold underline underline-offset-4"
             >
               Visit {site.social.substackPublicationName}
             </a>

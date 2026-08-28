@@ -17,7 +17,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
   });
 
   return (
-    <article className="border-taupe/50 flex flex-col border-t pt-5">
+    <article className="border-taupe/50 card-motion hover:border-ink/40 flex flex-col border-t pt-5">
       <p className="text-eyebrow text-olive flex items-center gap-2 font-semibold uppercase">
         <time dateTime={article.date}>{dateLabel}</time>
         <span aria-hidden="true">·</span>

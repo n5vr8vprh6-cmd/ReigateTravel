@@ -53,7 +53,9 @@ test.describe("Scroll motion never hides content", () => {
       const links = [...document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')];
       for (const link of links) {
         const css = await fetch(link.href).then((r) => r.text());
-        for (const m of css.matchAll(/@keyframes\s+(rise-in|image-parallax|hero-zoom)\s*\{/g)) {
+        for (const m of css.matchAll(
+          /@keyframes\s+(rise-in|image-parallax|hero-zoom|cta-converge|stage-rise|interlude-drift)\s*\{/g
+        )) {
           // Grab the keyframe body and check it never touches opacity.
           const start = m.index! + m[0].length;
           let depth = 1;

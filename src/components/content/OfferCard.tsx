@@ -19,7 +19,7 @@ interface OfferCardProps {
 export function OfferCard({ offer }: OfferCardProps) {
   if (offer.emphasis === "primary") {
     return (
-      <article className="bg-surface-raised ring-ink/10 grid overflow-hidden rounded-sm ring-1 lg:grid-cols-2">
+      <article className="bg-surface-raised ring-ink/10 card-motion hover:ring-ink/30 grid overflow-hidden rounded-sm ring-1 lg:grid-cols-2">
         {offer.image ? (
           <div className="bg-sand relative min-h-[15rem] lg:min-h-full">
             <Image
@@ -43,7 +43,7 @@ export function OfferCard({ offer }: OfferCardProps) {
   }
 
   return (
-    <article className="border-ink/15 flex flex-col gap-3 rounded-sm border p-6">
+    <article className="border-ink/15 card-motion hover:border-ink/40 flex flex-col gap-3 rounded-sm border p-6">
       <h3 className="font-display text-[1.2rem] font-medium">{offer.name}</h3>
       <p className="text-body text-ink/75">{offer.description}</p>
       <div className="mt-auto pt-3">

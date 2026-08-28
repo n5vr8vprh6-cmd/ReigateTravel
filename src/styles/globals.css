@@ -75,9 +75,19 @@
   --radius-sm: 2px;
   --radius-md: 4px;
 
-  /* --- Motion --- */
+  /* --- Motion ---
+     A scale, not a single value. Before this there was one duration token and the code
+     used 900ms, 700ms, 2600ms, 220ms and Tailwind implicit 150ms in two places, so the
+     page had five tempos and no vocabulary for choosing between them.
+     Press feedback is the one interaction where latency is felt directly - the user is
+     watching the exact moment they click - so it gets its own, faster step. */
   --ease-calm: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --duration-base: 220ms;
+  /* For elements leaving rather than arriving: starts fast, settles out. */
+  --ease-exit: cubic-bezier(0.4, 0, 0.7, 0.2);
+  --duration-press: 140ms; /* pressed states only */
+  --duration-base: 220ms; /* colour + state changes */
+  --duration-slow: 400ms; /* image and card hover, where a slower move reads as considered */
+  --duration-entrance: 900ms; /* the hero load, once per visit */
 }
 
 /* =============================================================================
@@ -279,6 +289,19 @@
   }
 }
 
+/* The closing band. The page opens with four hero layers separating on exit; this is the
+   same gesture inverted - the CTA assembles as you arrive at it, so the composition that
+   came apart at the top comes back together at the bottom. Transform only, so a browser
+   that never runs it shows a perfectly ordinary, fully readable CTA. */
+@keyframes cta-converge {
+  from {
+    translate: 0 var(--cta-shift, 1.5rem);
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
 @keyframes draw-rule {
   from {
     stroke-dashoffset: 100;
@@ -294,7 +317,7 @@
      cannot both apply — the more specific one silently replaces the other. Keeping them on
      separate elements is what makes the two coexist. */
   .hero-enter > div > * > * {
-    animation: hero-rise 900ms var(--ease-calm) both;
+    animation: hero-rise var(--duration-entrance) var(--ease-calm) both;
   }
   .hero-enter > div > *:nth-child(1) > * {
     animation-delay: 60ms;
@@ -340,13 +363,60 @@
     transform-origin: top;
   }
 
+  /* Cards. Until now OfferCard and ArticleCard had no hover state at all - the most
+     conspicuous gap on the page, since every card is a link target. The ring/border firms
+     rather than changing hue, so the card reads as interactive without spending a colour
+     or implying status. Photography inside a card lifts very slightly; 1.04 is deliberately
+     under the editorial-image hover (1.17), because a card is a UI object and a full-bleed
+     photograph is not. */
+  .card-motion {
+    transition:
+      box-shadow var(--duration-base) var(--ease-calm),
+      border-color var(--duration-base) var(--ease-calm);
+  }
+
+  @media (hover: hover) {
+    .card-motion img {
+      transition: scale var(--duration-slow) var(--ease-calm);
+    }
+    .card-motion:hover img {
+      scale: 1.04;
+    }
+    /* The link glyph inside a card answers to the whole card, not just to itself, so the
+       affordance covers the entire target rather than a few words of it. */
+    .card-motion:hover [data-glyph] {
+      translate: 0.25rem 0;
+    }
+  }
+
   @media (hover: hover) {
     .editorial-image img {
-      transition: scale 700ms var(--ease-calm);
+      transition: scale var(--duration-slow) var(--ease-calm);
     }
     .editorial-image:hover img {
       scale: 1.17;
     }
+  }
+
+  /* Buttons transition four properties on two tempos. Colour reads as state and can take
+     its time; the pressed translate is direct feedback on the exact frame the user clicks,
+     so it runs at the faster press step. Expressed here rather than as a Tailwind utility
+     because a single transition-* class cannot carry two different durations. */
+  .btn-motion {
+    transition:
+      color var(--duration-base) var(--ease-calm),
+      background-color var(--duration-base) var(--ease-calm),
+      border-color var(--duration-base) var(--ease-calm),
+      translate var(--duration-press) var(--ease-calm);
+  }
+
+  /* Interactive surfaces that are not controls: nav, footer and inline links. One tempo and
+     one curve, so the whole page agrees on what a hover feels like. Several of these used to
+     have no transition at all and snapped. */
+  .link-motion {
+    transition:
+      color var(--duration-base) var(--ease-calm),
+      text-decoration-color var(--duration-base) var(--ease-calm);
   }
 
   .horizon-rule path {
@@ -539,6 +609,33 @@
           cover 0% cover 100%;
       }
 
+      /* Named on the section for the same reason as everywhere else: each layer must read
+         the SECTION’s progress, not its own, or they arrive independently instead of
+         converging. Depth 1 travels furthest, matching the hero’s depth vocabulary. */
+      .cta-frame {
+        view-timeline-name: --cta-frame;
+      }
+      .cta-layer {
+        animation: cta-converge linear both;
+        animation-timeline: --cta-frame;
+        animation-range: entry 15% cover 45%;
+      }
+      .cta-layer[data-depth="1"] {
+        --cta-shift: 2.5rem;
+      }
+      .cta-layer[data-depth="2"] {
+        --cta-shift: 1.9rem;
+      }
+      .cta-layer[data-depth="3"] {
+        --cta-shift: 1.4rem;
+      }
+      .cta-layer[data-depth="4"] {
+        --cta-shift: 0.9rem;
+      }
+      .cta-layer[data-depth="5"] {
+        --cta-shift: 0.5rem;
+      }
+
       /* Same trap on the hero: its <section> is overflow-hidden, so `scroll()` resolved
          against the section rather than the page. Named timeline on the section. */
       .hero-frame {
@@ -633,6 +730,7 @@
   .interlude-image,
   .method-stage,
   .hero-layer,
+  .cta-layer,
   /* Lands on frame 0 — an ordinary still of her at the top of the steps, never mid-stride. */
   .sequence-strip {
     translate: none !important;

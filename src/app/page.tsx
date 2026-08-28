@@ -37,7 +37,7 @@ export default function HomePage() {
       {/* 2 — Clear explanation. `lg` so the page opens with more air than it carries mid-scroll. */}
       <Section surface="ivory" size="lg" id="what-is-reigate" aria-labelledby="explanation-heading">
         <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-          <div className="max-w-[34rem]">
+          <div className="reveal max-w-[34rem]">
             <SectionIntro heading={home.explanation.heading} headingId="explanation-heading" />
             {home.explanation.body.map((paragraph) => (
               <p key={paragraph} className="text-body text-ink/85 mt-4">
@@ -69,9 +69,11 @@ export default function HomePage() {
         <div className="max-w-[46rem]">
           <SectionIntro heading={home.recognition.heading} headingId="recognition-heading" />
         </div>
-        <div className="reveal">
+        <div>
           <RecognitionList statements={home.recognition.statements} />
-          <p className="text-body-lg text-ink/85 mt-6 max-w-[40rem]">{home.recognition.bridge}</p>
+          <p className="reveal text-body-lg text-ink/85 mt-6 max-w-[40rem]">
+            {home.recognition.bridge}
+          </p>
         </div>
       </Section>
 
@@ -86,7 +88,7 @@ export default function HomePage() {
             className="lg:-ml-[max(1.5rem,calc((100vw-var(--container-content))/2))] lg:w-[calc(100%+max(1.5rem,calc((100vw-var(--container-content))/2)))]"
             sizes="(max-width: 1024px) 100vw, 55vw"
           />
-          <div className="max-w-[36rem]">
+          <div className="reveal max-w-[36rem]">
             <h2 id="bespoke-heading" className="text-h2">
               {home.bespoke.heading}
             </h2>
@@ -141,13 +143,13 @@ export default function HomePage() {
             lead={home.ecosystem.subheading}
           />
         </div>
-        <div className="reveal mt-10 space-y-6">
+        <div className="reveal-stagger mt-10 space-y-6">
           {offers
             .filter((offer) => offer.emphasis === "primary")
             .map((offer) => (
               <OfferCard key={offer.id} offer={offer} />
             ))}
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="reveal-stagger grid gap-6 sm:grid-cols-2">
             {offers
               .filter((offer) => offer.emphasis === "secondary")
               .map((offer) => (
@@ -266,13 +268,18 @@ export default function HomePage() {
 
       {/* 10 — Tyler Takes Off invitation */}
       <Section surface="ivory" size="sm" aria-label="Join the community">
-        <div id="join" className="scroll-mt-[var(--header-height,4.5rem)]">
+        <div id="join" className="reveal scroll-mt-[var(--header-height,4.5rem)]">
           <NewsletterSignup />
         </div>
       </Section>
 
       {/* 11 — Final CTA. `lg` so the page closes with the same air it opened with. */}
-      <Section surface="inverse" size="lg" aria-labelledby="final-cta-heading">
+      <Section
+        surface="inverse"
+        size="lg"
+        className="cta-frame"
+        aria-labelledby="final-cta-heading"
+      >
         <CTAPanel
           heading={home.finalCta.heading}
           headingId="final-cta-heading"

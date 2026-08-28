@@ -11,8 +11,8 @@ interface TextLinkProps {
 
 const base =
   "group inline-flex items-center gap-1.5 font-sans text-[0.9375rem] font-semibold text-ink " +
-  "underline decoration-taupe decoration-1 underline-offset-4 transition-colors " +
-  "duration-[var(--duration-base)] hover:decoration-copper focus-visible:outline-3";
+  "underline decoration-taupe decoration-1 underline-offset-4 link-motion " +
+  "hover:decoration-copper focus-visible:outline-3";
 
 /**
  * The glyph travels on hover; the underline does not draw in. A link has to be
@@ -36,7 +36,7 @@ export function TextLink({ href, children, external, accessibleLabel, className 
         className={cn(base, className)}
       >
         {children}
-        <span aria-hidden="true" className={glyph}>
+        <span aria-hidden="true" data-glyph="" className={glyph}>
           ↗
         </span>
       </a>
@@ -45,7 +45,7 @@ export function TextLink({ href, children, external, accessibleLabel, className 
   return (
     <Link href={href} aria-label={accessibleLabel} className={cn(base, className)}>
       {children}
-      <span aria-hidden="true" className={glyph}>
+      <span aria-hidden="true" data-glyph="" className={glyph}>
         →
       </span>
     </Link>

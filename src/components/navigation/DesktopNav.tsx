@@ -11,7 +11,7 @@ export function DesktopNav() {
           <li key={item.href}>
             <Link
               href={item.href}
-              className="text-ink hover:text-olive font-sans text-[0.9375rem] font-medium underline-offset-4 transition-colors hover:underline focus-visible:outline-3"
+              className="text-ink hover:text-olive link-motion font-sans text-[0.9375rem] font-medium underline-offset-4 hover:underline focus-visible:outline-3"
             >
               {item.label}
             </Link>

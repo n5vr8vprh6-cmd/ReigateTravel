@@ -67,7 +67,13 @@ test.describe("Contrast on the inverse (Olive) band", () => {
     await page.goto("/");
     // Large text (>=24px) needs 3:1; the body copy beside it needs 4.5:1.
     expect(await contrastOf(page, "#final-cta-heading")).toBeGreaterThanOrEqual(3);
-    expect(await contrastOf(page, "#final-cta-heading ~ p")).toBeGreaterThanOrEqual(4.5);
+    // Hooked by data attribute rather than by sibling position: the CTA elements sit in
+    // per-element wrappers so the band can converge on scroll, and a structural selector
+    // would break on the next composition change without the contrast having moved.
+    expect(await contrastOf(page, "[data-cta='body']")).toBeGreaterThanOrEqual(4.5);
+    // The endline was the least legible text on the page: 15px Cormorant italic at weight
+    // 400 and opacity-70 measured a 2.7:1 rendered median. Asserted so it cannot regress.
+    expect(await contrastOf(page, "[data-cta='endline']")).toBeGreaterThanOrEqual(4.5);
   });
 
   test("no heading anywhere on an inverse surface renders Ink", async ({ page }) => {

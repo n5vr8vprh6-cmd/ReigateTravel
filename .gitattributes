@@ -1,0 +1,15 @@
+# Normalise line endings. Without this, core.autocrlf=true rewrites the working tree to CRLF
+# on checkout while Prettier's endOfLine default is "lf", so `npm run verify` fails at
+# format:check on files nobody edited - every merge or branch switch reintroduces it.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.pdf binary
+*.docx binary
+*.woff binary
+*.woff2 binary

@@ -17,8 +17,8 @@ interface ButtonLinkProps {
 
 const base =
   "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-sm px-6 py-3 " +
-  "font-sans text-[0.9375rem] font-semibold tracking-wide transition-[colors,translate] " +
-  "duration-[var(--duration-base)] ease-[var(--ease-calm)] focus-visible:outline-3 " +
+  "font-sans text-[0.9375rem] font-semibold tracking-wide btn-motion " +
+  "focus-visible:outline-3 " +
   // A real pressed state. `translate` rather than `transform` so it never fights the
   // scroll-linked transforms elsewhere, and it moves no neighbouring layout.
   "active:translate-y-px";
