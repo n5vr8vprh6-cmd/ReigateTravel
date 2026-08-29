@@ -141,7 +141,14 @@ export const home = {
       "Based in the Greater Toronto Area, Tyler is building Reigate as a trusted relationship clients can return to across different journeys, destinations, and stages of life.", // [A — verbatim from approved bio]
     ],
     cta: { label: "Meet Tyler", href: "/about" },
-    // No approved headshot yet → FounderFeature renders the typographic fallback.
+    // Approved headshot, supplied by the client and confirmed cleared for commercial use
+    // (missing-inputs #1, closed). The alt names the person because this is a portrait of a
+    // real, named individual - unlike the editorial imagery elsewhere, which is described
+    // rather than identified.
+    portrait: {
+      src: "/images/tyler-portrait.jpg",
+      alt: "Tyler, founder of Reigate Travel & Co.",
+    },
   },
 
   travelNotes: {

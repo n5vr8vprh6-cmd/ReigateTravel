@@ -6,7 +6,7 @@ neutral fallback shipped in Milestone 1.
 
 | # | Missing input | Affects | Milestone 1 fallback (public-safe) | Blocks |
 |---|---------------|---------|-------------------------------------|--------|
-| 1 | Approved Tyler headshot photography | Founder feature (homepage §8, /about) | Olive typographic founder panel, no portrait. AI face prohibited. | Final visual polish |
+| 1 | ~~Approved Tyler headshot photography~~ **RESOLVED** (decision-log #73). Client supplied `tyler-portrait.jpg` and confirmed commercial clearance. | Founder feature (homepage §8) | Portrait now renders in place of the Olive typographic panel. **AI face remains prohibited** - if the photograph is withdrawn, revert to the panel rather than generating a substitute. | - |
 | 2 | Three approved Travel Notes articles (title, summary, date, topic, per-article URL) | Homepage §9 Travel Notes | Neutral "New notes are on the way" holding copy; **no fabricated cards**, and no outbound promise while #9 is open. | Article grid |
 | 3 | Fee / investment ranges & language | /travel-planning, /begin-planning | Homepage makes no fee claim; Bespoke section describes value, not price. | Pricing content |
 | 4 | Confirmed Community Experience (name, date, location, description, expectations, Luma event URL) | Homepage §7 Community | State B: community philosophy + Substack invitation. Luma **calendar** link only; no event rendered. | State-A featured event |

@@ -29,6 +29,21 @@ outside approved variants, cropped, stretched, or effect-laden.
 | `oakville-horizon.png` | §7 Community (State B) | Approved (editorial) | 1680×720 | "The Lake Ontario horizon seen from the Oakville waterfront." |
 | `botanical-shadow.png` | §10 Newsletter (background texture) | Approved (editorial) | 1344×896 | decorative (empty alt) |
 
+## Founder portrait → `public/images/`
+
+The only photograph on the site of a real, identified person. It sits apart from the table above
+because the rules differ: the editorial imagery is Midjourney-generated and conceptual, and its
+alt text describes a scene without identifying anyone. This one is a real portrait, so its alt
+names the person.
+
+| File (repo) | Use | Approval | Dimensions | Alt text |
+|---|---|---|---|---|
+| `tyler-portrait.jpg` | Homepage §8 founder feature | Client-supplied; confirmed cleared for commercial use | 800x800 | "Tyler, founder of Reigate Travel & Co." |
+
+**AI imagery for Tyler remains prohibited.** Supplying a real headshot closes the missing input;
+it does not relax that rule. If this photograph is ever withdrawn, revert to the Olive
+typographic panel rather than substituting anything generated.
+
 ## Scroll sequences → `public/images/`
 
 Vertical sprite strips: every frame of a short clip stacked into one image, stepped one frame at

@@ -35,5 +35,6 @@ has no console errors before reporting done — don't ask the user to check manu
   full details is supplied. Never fabricate an event.
 - Travel Notes renders a neutral Substack invitation until three approved articles exist. Never
   render placeholder article cards.
-- Tyler's founder section uses the typographic fallback until an approved headshot is supplied.
-  Never use AI imagery for Tyler.
+- Tyler's founder section now uses the approved headshot (`tyler-portrait.jpg`, client-supplied
+  and cleared for commercial use). The other half of this rule is unchanged and permanent:
+  **never use AI imagery for Tyler.**
