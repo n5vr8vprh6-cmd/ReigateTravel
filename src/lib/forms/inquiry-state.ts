@@ -7,7 +7,7 @@ import type { FieldErrors } from "@/lib/validation/inquiry";
  * not fail the build — it silently arrives as `undefined` on the client, which surfaced here as
  * "Cannot read properties of undefined" while prerendering, three layers away from the cause.
  */
-export type InquiryStatus = "idle" | "invalid" | "rate_limited" | "delivery_failed";
+export type InquiryStatus = "idle" | "invalid" | "too_fast" | "rate_limited" | "delivery_failed";
 
 export interface InquiryState {
   status: InquiryStatus;

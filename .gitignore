@@ -32,7 +32,9 @@ yarn-error.log*
 
 # env files
 .env
-.env*.local
+.env*
+# .env.example is documentation and is tracked; the blanket rule above would hide it.
+!.env.example.local
 .env.local
 
 # vercel
@@ -47,3 +49,4 @@ yarn-error.log*
 # and stays tracked; only the installed skills under `.claude/skills` are ignored.
 /.agents/
 /.claude/skills/
+.env*

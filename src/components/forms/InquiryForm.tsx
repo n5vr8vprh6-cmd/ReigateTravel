@@ -169,10 +169,18 @@ export function InquiryForm() {
         </div>
       ) : null}
 
-      {state.status === "rate_limited" || state.status === "delivery_failed" ? (
+      {/* Every non-idle status that does not redirect must render something. A status that
+          renders nothing is indistinguishable from a broken button. */}
+      {state.status === "rate_limited" ||
+      state.status === "delivery_failed" ||
+      state.status === "too_fast" ? (
         <div className="border-ink bg-surface-raised mb-8 border-2 p-5">
           <p className="text-body text-ink">
-            {state.status === "rate_limited" ? inquiryCopy.rateLimited : inquiryCopy.deliveryFailed}
+            {state.status === "rate_limited"
+              ? inquiryCopy.rateLimited
+              : state.status === "too_fast"
+                ? inquiryCopy.tooFast
+                : inquiryCopy.deliveryFailed}
           </p>
           {state.status === "delivery_failed" ? (
             <p className="text-body mt-3">

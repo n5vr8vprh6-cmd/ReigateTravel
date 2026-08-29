@@ -38,8 +38,11 @@ export async function submitInquiry(
     redirect("/begin-planning/received");
   }
 
+  // Its own status, not "invalid". "invalid" with no fieldErrors renders nothing at all —
+  // the visitor clicks Send and the page simply sits there. Found by submitting the live
+  // form faster than a person would and watching nothing happen.
   if (submittedTooFast(formData)) {
-    return { status: "invalid", fieldErrors: {}, values };
+    return { status: "too_fast", fieldErrors: {}, values };
   }
 
   const requestHeaders = await headers();

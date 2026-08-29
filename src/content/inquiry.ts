@@ -301,6 +301,13 @@ export const inquiryCopy = {
   /** Shown when delivery fails. Never a false success — the answers stay on screen. */
   deliveryFailed:
     "We could not deliver your inquiry just now. Nothing is lost — your answers are still here.",
+  /**
+   * Retryable on purpose. The stamp is written once on hydration and the elapsed time keeps
+   * growing, so a second attempt a moment later passes. A real person who prepared their
+   * answers, or whose password manager filled the contact step, can hit this.
+   */
+  tooFast:
+    "That came through faster than this form usually takes. Please check your answers and send again.",
   rateLimited:
     "That is a few inquiries from this connection in a short time. Please wait a few minutes and try again.",
 } as const;
