@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
-import { primaryNav, footerNav, legalNav } from "@/content/navigation";
+import { primaryNav, footerNav, legalNav, connectNav } from "@/content/navigation";
 
 /**
  * The sitemap spreads the nav arrays. That coupling is invisible and fails silently: split a
@@ -17,6 +17,7 @@ describe("navigation and sitemap stay in sync", () => {
     ...primaryNav.map((i) => i.href),
     ...footerNav.map((i) => i.href),
     ...legalNav.map((i) => i.href),
+    ...connectNav.map((i) => i.href),
     "/",
     "/begin-planning",
   ];
@@ -27,6 +28,11 @@ describe("navigation and sitemap stay in sync", () => {
 
   it("lists every route exactly once", () => {
     expect(new Set(sitemapPaths).size).toBe(sitemapPaths.length);
+  });
+
+  it("keeps contact with the ways of getting in touch, not in the utility list", () => {
+    expect(footerNav.map((i) => i.href)).not.toContain("/contact");
+    expect(connectNav.map((i) => i.href)).toContain("/contact");
   });
 
   it("keeps the three legal routes out of the utility list", () => {

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/seo";
-import { primaryNav, footerNav, legalNav } from "@/content/navigation";
+import { primaryNav, footerNav, legalNav, connectNav } from "@/content/navigation";
 
 /** Sitemap foundation. Home + every internal route in the Charter sitemap. */
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...primaryNav.map((item) => item.href),
     ...footerNav.map((item) => item.href),
     ...legalNav.map((item) => item.href),
+    ...connectNav.map((item) => item.href),
   ];
   const unique = Array.from(new Set(routes));
   const lastModified = new Date();

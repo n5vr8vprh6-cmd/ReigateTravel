@@ -13,8 +13,14 @@ export const footerNav: NavItem[] = [
   { label: "Curated Wellness Journeys", href: "/curated-journeys" },
   { label: "Partnerships", href: "/partnerships" },
   { label: "Frequently Asked Questions", href: "/faq" },
-  { label: "Contact", href: "/contact" },
 ];
+
+/**
+ * Routes that belong with the ways of getting in touch rather than in the Explore list.
+ * Separate from `footerNav` so the Connect column owns them, and spread into the sitemap
+ * alongside the others.
+ */
+export const connectNav: NavItem[] = [{ label: "Contact", href: "/contact" }];
 
 /**
  * Legal and compliance routes. Split out of `footerNav` so they can sit on the copyright
