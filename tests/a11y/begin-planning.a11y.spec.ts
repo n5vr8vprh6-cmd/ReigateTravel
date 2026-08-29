@@ -55,3 +55,43 @@ test("the confirmation page has no serious/critical a11y violations", async ({ p
   await page.waitForSelector("h1", { state: "visible" });
   await scan(page, "on /begin-planning/received");
 });
+
+/**
+ * /travel-planning is the page the Charter routes visitors through before the inquiry, so it
+ * carries real content rather than a shell and needs the same scan. It reuses ProcessSteps and
+ * RecognitionList from the homepage, and adds a definition list the homepage does not have.
+ */
+for (const { name, width, height } of widths) {
+  test(`travel-planning has no serious/critical a11y violations @ ${name} (${width}px)`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto("/travel-planning");
+    await page.waitForSelector("h1", { state: "visible" });
+    // Settle the scroll reveals before scanning, for the reason the homepage spec explains:
+    // axe samples whatever frame it catches, and an in-flight transform is not the state
+    // WCAG governs.
+    await page.evaluate(async () => {
+      const step = Math.max(200, window.innerHeight);
+      for (let y = 0; y < document.body.scrollHeight; y += step) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      window.scrollTo(0, 0);
+    });
+    await page.waitForTimeout(600);
+    await scan(page, `on /travel-planning @ ${name}`);
+  });
+}
+
+test("travel-planning has exactly one h1 and no skipped heading levels", async ({ page }) => {
+  await page.goto("/travel-planning");
+  await expect(page.locator("h1")).toHaveCount(1);
+  const levels = await page.$$eval("h1,h2,h3", (els) => els.map((e) => Number(e.tagName[1])));
+  for (let i = 1; i < levels.length; i++) {
+    expect(
+      levels[i]! - levels[i - 1]!,
+      `heading jumped from h${levels[i - 1]} to h${levels[i]}`
+    ).toBeLessThanOrEqual(1);
+  }
+});
