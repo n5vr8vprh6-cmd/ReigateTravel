@@ -35,17 +35,21 @@ export function InquiryForm() {
   const [enhanced, setEnhanced] = useState(false);
   const [step, setStep] = useState(0);
   const [clientErrors, setClientErrors] = useState<FieldErrors>({});
+  // Held in state, not written onto the DOM node through a ref. The ref version silently
+  // never stamped: the value read back empty on every environment, so the timing gate was
+  // dead code and no submission was ever checked against it. Rendering it declaratively
+  // means React owns it and it cannot be lost to a re-render.
+  const [renderedAt, setRenderedAt] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
   const headingRefs = useRef<(HTMLHeadingElement | null)[]>([]);
-  const renderedAtRef = useRef<HTMLInputElement>(null);
   const lastStep = inquirySteps.length - 1;
 
   // Enhancement and the timing stamp both belong to the hydrated session.
   useEffect(() => {
     setEnhanced(true);
-    if (renderedAtRef.current) renderedAtRef.current.value = String(Date.now());
+    setRenderedAt(String(Date.now()));
   }, []);
 
   // A rejected submit jumps to the earliest step that actually has a problem, rather than
@@ -127,7 +131,7 @@ export function InquiryForm() {
           autoComplete="off"
         />
       </div>
-      <input ref={renderedAtRef} name={RENDERED_AT_FIELD} type="hidden" defaultValue="" />
+      <input name={RENDERED_AT_FIELD} type="hidden" value={renderedAt} readOnly />
 
       {enhanced ? (
         <div className="mb-10">
