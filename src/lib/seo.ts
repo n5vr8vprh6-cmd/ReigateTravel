@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { site } from "@/content/site";
 
 /** True only when explicitly allowed (approved production). Protects preview deployments. */
@@ -29,6 +29,17 @@ export const baseMetadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+};
+
+/**
+ * `themeColor` has to live on a `viewport` export — the App Router warns and drops it when it
+ * appears in `metadata`. One value rather than a light/dark pair, because there is no dark theme:
+ * serving Ink under `prefers-color-scheme: dark` would paint dark browser chrome directly above an
+ * Ivory header. Ivory is what sits at the very top of every page, so the chrome meets the header
+ * without a seam. Kept here so the browser-chrome colour and the page metadata stay in one file.
+ */
+export const baseViewport: Viewport = {
+  themeColor: "#f6f2ed", // Ivory — --color-surface in globals.css
 };
 
 /**

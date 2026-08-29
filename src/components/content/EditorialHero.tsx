@@ -36,13 +36,20 @@ export function EditorialHero() {
       data-surface="inverse"
       className="hero-frame bg-ink relative isolate flex min-h-[100svh] items-end overflow-hidden"
     >
+      {/* Two framings, because one does not survive both aspect ratios. The photograph is 3:2
+          and the hero is 100svh, so a phone crops it to roughly a third of its width — and at
+          62% that window opens at source x545, which lands inside the subject's face. Below
+          `sm` the window recentres to put her head on the left third with lead room ahead of
+          her gaze; from `sm` up the frame is wide enough that 62% reads as composed. Only the
+          horizontal value differs: at these heights object-cover fills the height exactly, so
+          the vertical value is inert on a phone and still does its work on a wide viewport. */}
       <Image
         src={image.src}
         alt={image.alt}
         fill
         priority
         sizes="100vw"
-        className="hero-drift absolute inset-0 -z-20 object-cover object-[62%_34%]"
+        className="hero-drift absolute inset-0 -z-20 object-cover object-[50%_34%] sm:object-[62%_34%]"
       />
       {/* Contrast scrim — an opacity ramp, not a decorative gradient. It holds at >=0.74
           across the full height of the copy block and only falls away above it, so the
@@ -74,7 +81,11 @@ export function EditorialHero() {
             </h1>
           </div>
           <div className="hero-layer" data-depth="3">
-            <p className="text-body-lg text-ivory/90 mt-6 max-w-[34rem]">{body}</p>
+            {/* Narrower than the 38rem column on purpose — the lead should taper under the
+                headline rather than match it. 34rem measured 48 characters, which is inside
+                the 45–75 band but at the very bottom of it; 36rem holds the taper and reads
+                at ~53. */}
+            <p className="text-body-lg text-ivory/90 mt-6 max-w-[36rem]">{body}</p>
           </div>
           <div className="hero-layer" data-depth="4">
             <div className="mt-9 flex flex-col gap-4 sm:flex-row">

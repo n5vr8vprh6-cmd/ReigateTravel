@@ -38,8 +38,13 @@
   --text-eyebrow--letter-spacing: 0.14em;
   --text-body: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem); /* 16–17px */
   --text-body--line-height: 1.65;
+  /* Montserrat is a geometric sans and sets loose at body sizes. A hair of negative tracking
+     tightens the word shapes without touching the size or the leading. Deliberately absent
+     from --text-eyebrow, which needs its wide positive tracking to read as a label. */
+  --text-body--letter-spacing: -0.01em;
   --text-body-lg: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
   --text-body-lg--line-height: 1.6;
+  --text-body-lg--letter-spacing: -0.01em;
   --text-h3: clamp(1.25rem, 1.1rem + 0.7vw, 1.6rem);
   --text-h3--line-height: 1.25;
   /* Quiet step, for utility sections that should not compete with the narrative beats. */

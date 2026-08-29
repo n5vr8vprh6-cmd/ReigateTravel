@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import "@/styles/globals.css";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { baseMetadata, organizationJsonLd } from "@/lib/seo";
+import { baseMetadata, baseViewport, organizationJsonLd } from "@/lib/seo";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -21,6 +21,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = baseMetadata;
+export const viewport: Viewport = baseViewport;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
