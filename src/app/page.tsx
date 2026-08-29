@@ -14,6 +14,7 @@ import { ArticleCard } from "@/components/content/ArticleCard";
 import { NewsletterSignup } from "@/components/content/NewsletterSignup";
 import { Interlude } from "@/components/content/Interlude";
 import { ScrollSequence } from "@/components/content/ScrollSequence";
+import { AmbientVideo } from "@/components/content/AmbientVideo";
 import { home } from "@/content/home";
 import { offers } from "@/content/offers";
 import { featuredArticles } from "@/content/articles";
@@ -108,19 +109,11 @@ export default function HomePage() {
 
       {/* Interlude — the coastline between the commercial act and the method. No copy, no CTA,
           nothing to read: it exists to change the page's tempo (decision-log #36).
-          Now scroll-scrubbed rather than a still, so the sea moves as the visitor descends and
-          runs back the other way on the way up. Rendered bare rather than inside a Section
-          because it deliberately has no band padding, exactly as the still did. The trade-off
-          is height: the band is now the frame's own 16:9 rather than a full 100svh, so on a
-          phone this is a band rather than a full screen. */}
-      <ScrollSequence
-        src={home.coastline.src}
-        alt={home.coastline.alt}
-        frames={home.coastline.frames}
-        frameWidth={home.coastline.frameWidth}
-        frameHeight={home.coastline.frameHeight}
-        sizes="100vw"
-      />
+          A clip that plays itself rather than a scroll-scrubbed strip. Client direction, and it
+          reverses part of #43 for this band only - the hero still carries no video. It also
+          gives the band its full 100svh back, which the 16:9 strip had cost it, worst on a
+          phone where it had shrunk from 844px to 219px. */}
+      <AmbientVideo src={home.coastline.src} poster={home.coastline.poster} position="50% 55%" />
 
       {/* 5 — The Reigate Method (process proof). The page's pinned moment — the frame holds
           while the five stages advance. Earned rather than decorative: these stages are a

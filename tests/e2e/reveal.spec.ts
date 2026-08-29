@@ -195,16 +195,77 @@ test.describe("Scroll motion never hides content", () => {
     for (const v of offsets) expect(Math.abs(v)).toBeLessThan(0.5);
   });
 
-  test("no video ships with the page", async ({ page }) => {
+  // This replaces a blanket "no video ships with the page" assertion. That rule came from
+  // decision #43, which removed a 6.3MB hero video because it was the only motion running on
+  // its own clock. The reasoning still holds for the hero and the hero still has no video - but
+  // the client asked for the coastline interlude to play itself, and a band with no copy, no
+  // CTA and nothing to read is a reasonable place for that. So the invariant is now specific
+  // rather than absolute: no video in the hero, and any video that does ship must be cheap,
+  // silent, and must not cost anything until it is actually on screen.
+  test("video is confined to the interlude and costs nothing until it is on screen", async ({
+    page,
+  }) => {
     const media: string[] = [];
     page.on("response", (r) => {
       if (/\.(mp4|webm|mov)(\?|$)/.test(r.url())) media.push(r.url());
     });
+
     await homepage(page);
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(600);
-    expect(media, "the hero video was removed so every motion answers to scroll").toEqual([]);
-    expect(await page.locator("video").count()).toBe(0);
+
+    // Nothing fetched on arrival: the clip sits below several screens of content.
+    expect(media, "no video may be fetched before it is scrolled to").toEqual([]);
+
+    const heroVideos = await page.locator("section:has(#hero-heading) video").count();
+    expect(heroVideos, "the hero carries no video").toBe(0);
+
+    const videos = page.locator("video");
+    for (let i = 0; i < (await videos.count()); i++) {
+      const v = videos.nth(i);
+      // Silent and inline, or a phone will either blare audio or take over the screen.
+      await expect(v).toHaveJSProperty("muted", true);
+      await expect(v).toHaveAttribute("playsinline", "");
+      // A poster means the band is never empty, including where autoplay is refused.
+      await expect(v).toHaveAttribute("poster", /.+/);
+      // preload="none" is what makes the fetch lazy; `autoplay` would defeat it.
+      await expect(v).toHaveAttribute("preload", "none");
+      expect(await v.getAttribute("autoplay"), "autoplay would fetch eagerly").toBeNull();
+      // Decorative, so it must not be announced or reachable by keyboard.
+      await expect(v).toHaveAttribute("aria-hidden", "true");
+    }
+  });
+
+  test("the interlude clip plays when reached, and not under reduced motion", async ({
+    browser,
+  }) => {
+    for (const reduce of ["no-preference", "reduce"] as const) {
+      const ctx = await browser.newContext({ reducedMotion: reduce });
+      const page = await ctx.newPage();
+      const media: string[] = [];
+      page.on("response", (r) => {
+        if (/\.mp4(\?|$)/.test(r.url())) media.push(r.url());
+      });
+      await homepage(page);
+      await page.locator("video").first().scrollIntoViewIfNeeded();
+      await page.waitForTimeout(1500);
+
+      const played = await page
+        .locator("video")
+        .first()
+        .evaluate((v: HTMLVideoElement) => ({
+          currentTime: v.currentTime,
+          paused: v.paused,
+        }));
+
+      if (reduce === "reduce") {
+        // Never started, so never downloaded. The poster carries the band instead.
+        expect(media, "reduced motion must not fetch the clip").toEqual([]);
+        expect(played.currentTime, "reduced motion must not play the clip").toBe(0);
+      } else {
+        expect(media.length, "the clip should load once reached").toBeGreaterThan(0);
+        expect(played.currentTime, "the clip should be playing").toBeGreaterThan(0);
+      }
+      await ctx.close();
+    }
   });
 
   // The scroll-scrubbed sequence in the Reigate story section. `translate` here is a

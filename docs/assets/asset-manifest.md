@@ -29,6 +29,24 @@ outside approved variants, cropped, stretched, or effect-laden.
 | `oakville-horizon.png` | §7 Community (State B) | Approved (editorial) | 1680×720 | "The Lake Ontario horizon seen from the Oakville waterfront." |
 | `botanical-shadow.png` | §10 Newsletter (background texture) | Approved (editorial) | 1344×896 | decorative (empty alt) |
 
+## Ambient video → `public/video/`
+
+The only video on the site. Decision #43 removed a 6.3MB hero video and the hero still has
+none; this is the interlude only, at a fraction of the weight.
+
+| File (repo) | Poster | Homepage use | Size | Approval |
+|---|---|---|---|---|
+| `coastline.mp4` | `coastline-poster.jpg` | Interlude after §4 | 0.28 MB, 1280×720, 5.04s | Approved (editorial) |
+
+Generated with Kling from `mediterranean-coastline.png`, then re-encoded from the 15.1MB 1080p
+original with `._enc`-style canvas capture in headless Chromium. H.264 rather than VP9: it came
+out smaller here (0.28MB against 0.66MB) and needs no fallback source.
+
+`preload="none"`, no `autoplay` attribute, no `loop`. It is started by an IntersectionObserver
+when the band is on screen and holds on its last frame, so it costs nothing on arrival and never
+snaps the push-in back to the start. Under `prefers-reduced-motion` it is never started and
+never downloaded, and the poster carries the band.
+
 ## Founder portrait → `public/images/`
 
 The only photograph on the site of a real, identified person. It sits apart from the table above
@@ -54,7 +72,6 @@ a time by a scroll timeline. No video ships with the site. Each strip's source s
 |---|---|---|---|---|---|
 | `stairs-sequence.jpg` | `arched-doorway.png` | §2 Clear explanation | 24 | 512×640 | Approved (editorial) |
 | `sailboat-sequence.jpg` | `oakville-horizon.png` | §7 Community | 20 | 1024×574 | Approved (editorial) |
-| `coastline-sequence.jpg` | `mediterranean-coastline.png` | Interlude after §4 | 24 | 1024×576 | Approved (editorial) |
 
 Generated with Kling from the approved still, then extracted with
 `scripts/extract-sequence.mjs`. Alt text follows the source still, and is empty where the strip

@@ -115,23 +115,17 @@ export const home = {
     },
   },
 
-  // The coastline interlude, scroll-scrubbed. Frames come from a Kling clip generated from
-  // `mediterranean-coastline.png`, which stays in public/images as the source of frame 0.
+  // The coastline interlude, as a clip that plays itself.
   //
-  // The clip carries a slow push-in of its own. A locked-off camera was asked for and not
-  // delivered — but it lands where decision #50 already had this band going, where the water
-  // advanced as the visitor descended, so the move is now in the footage rather than in a CSS
-  // scale. Scrolling back up pulls the camera back out, for free, because the animation is a
-  // function of scroll position rather than a playhead.
+  // Generated with Kling from `mediterranean-coastline.png`, then re-encoded from the 15.1MB
+  // 1080p original down to 0.28MB of H.264 at 1280x720 - lighter than the 1.4MB sprite strip it
+  // replaced, and lighter than the 6.3MB hero video that decision #43 removed.
+  //
+  // The poster is frame 0, so wherever the clip cannot play the band still shows the coastline.
   coastline: {
-    src: "/images/coastline-sequence.jpg",
+    src: "/video/coastline.mp4",
+    poster: "/images/coastline-poster.jpg",
     sourceStill: "/images/mediterranean-coastline.png",
-    frames: 24,
-    frameWidth: 1024,
-    frameHeight: 576,
-    // Decorative: it carries no information the surrounding copy depends on, and it exists to
-    // change the page's tempo rather than to say anything.
-    alt: "",
   },
 
   tyler: {
