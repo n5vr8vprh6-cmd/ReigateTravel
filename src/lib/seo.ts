@@ -29,6 +29,16 @@ export const baseMetadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  /**
+   * The card itself is `src/app/opengraph-image.jpg`. Next's file convention emits og:image AND
+   * twitter:image from that one file, with dimensions, type and the alt text, inherited across
+   * every route — so nothing here points at an image. The only thing the convention does not
+   * choose is the card type, which defaults to "summary" and crops a 1200×630 card to a small
+   * square. That is all this block exists to set.
+   */
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 /**

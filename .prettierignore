@@ -15,3 +15,9 @@ package-lock.json
 .agents
 .claude/skills
 skills-lock.json
+
+# Agent worktrees. These are transient checkouts of this same repo under `.claude/worktrees/`;
+# git already excludes them as registered worktrees, but Prettier walks them and then fails
+# format:check on files that belong to another branch. The `.claude/skills` rule above does not
+# cover them - it is anchored at the root, and a worktree nests its own copy one level down.
+.claude/worktrees

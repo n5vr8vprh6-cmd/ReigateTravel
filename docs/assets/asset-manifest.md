@@ -94,3 +94,24 @@ count silently does not step.
 - Header logo choice (`reigate-primary` vs `reigate-circular`) to be confirmed at the visual gate
   after reviewing rendered header height; both are approved variants.
 - Full 78-image library is available but only the nine files above are imported to control weight.
+
+## Social share card → `src/app/`
+
+Not in `public/`: `opengraph-image.jpg` is a Next file convention, so it lives beside the route
+it describes and Next emits `og:image` with its dimensions and type. It is inherited by every
+route.
+
+| File (repo) | Use | Approval | Dimensions | Alt text |
+|---|---|---|---|---|
+| `opengraph-image.jpg` | `og:image` site-wide | Derived from approved assets (see below) | 1200×630, 62KB | in `opengraph-image.alt.txt` |
+
+**It is a derived asset, not a new one.** The card reproduces the homepage hero: `hero-coast.png`
+from the approved library, `reigate-symbol-white.png` used as-is on the dark end of the hero's own
+scrim, the horizon rule, and `site.brandIdea` as the headline. Nothing in it is generated, and no
+element appears that is not already on `/`. The still usage class is the one decision #25 permits —
+it rejected *video* of this subject as reading like documentary footage, not the still.
+
+Regenerate with `node scripts/build-og-image.mjs` after changing the hero image, the brand idea or
+the category. The script reads the copy out of `site.ts` and throws if that file is restructured,
+so the card cannot silently go stale. If a purpose-made card is ever supplied, replace the file and
+delete the script.
