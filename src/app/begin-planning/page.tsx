@@ -20,17 +20,27 @@ export const metadata: Metadata = {
  * falls back to the approved mailto path rather than showing a submit button that cannot
  * honour itself: CLAUDE.md's standing rule is that a submission is never simulated, and a
  * form that silently discards an inquiry is the worst version of simulating one.
+ *
+ * Width is `content`, not `prose`. At prose the form was a 40rem column with the right half of
+ * the page empty, and there was nowhere to stand the step index that shows the visitor how much
+ * of the inquiry is left. The form manages its own two-column grid inside; the heading cluster
+ * is capped at 38rem so it still aligns with the fields rather than stretching to 72rem.
+ *
+ * The H1 steps down from `statement` to `default`. Two statement-scale headings stacked - the
+ * page title and the step's question - compete, and the question is the one that should win:
+ * it is what the visitor is actually being asked. An H1 set smaller than the H2 beneath it is
+ * a deliberate editorial call, and changes nothing about the heading order.
  */
 export default function BeginPlanningPage() {
   return (
-    <Section surface="ivory" width="prose" aria-labelledby="begin-planning-heading">
+    <Section surface="ivory" aria-labelledby="begin-planning-heading">
       <SectionIntro
         as="h1"
         eyebrow={inquiryCopy.eyebrow}
         heading={inquiryCopy.heading}
         headingId="begin-planning-heading"
         lead={emailConfigured ? inquiryCopy.lead : undefined}
-        size="statement"
+        className="max-w-[38rem]"
       />
 
       {emailConfigured ? (

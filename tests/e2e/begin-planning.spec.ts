@@ -165,5 +165,103 @@ test.describe("Begin Planning", () => {
       );
       expect(small).toEqual([]);
     });
+
+    /**
+     * The progress device is the site's signature mark travelling along a track, not a bar
+     * filling up. It is decorative and aria-hidden, so these assertions protect the visual
+     * guarantee only - the step position is carried in text by `stepLabel`, asserted above,
+     * and that remains the accessible source of truth.
+     */
+    test("the horizon mark advances along the track as steps advance", async ({ page }) => {
+      const readMark = () =>
+        page.evaluate(() => {
+          const mark = document.querySelector(".inquiry-progress-mark");
+          const fill = document.querySelector(".inquiry-progress-fill");
+          if (!mark || !fill) return null;
+          const track = mark.parentElement!.getBoundingClientRect();
+          return {
+            left: Math.round(mark.getBoundingClientRect().left - track.left),
+            fill: Math.round(fill.getBoundingClientRect().width),
+            track: Math.round(track.width),
+          };
+        });
+
+      const first = await readMark();
+      expect(first, "the progress device must render").not.toBeNull();
+
+      await page.fill("#f-firstName", "Ada");
+      await page.fill("#f-lastName", "Lovelace");
+      await page.fill("#f-email", "ada@example.com");
+      await page.getByRole("button", { name: "Continue" }).click();
+      await expect(stepLabel(page)).toContainText("Step 2 of 6");
+      // The transition runs for --duration-slow; poll rather than race it.
+      await expect
+        .poll(async () => (await readMark())!.left, {
+          message: "the mark must move forward with the step",
+        })
+        .toBeGreaterThan(first!.left);
+
+      const second = await readMark();
+      // The fill stops at the mark rather than under its leading edge, and neither may run
+      // past the end of the track.
+      expect(second!.fill).toBeGreaterThan(second!.left);
+      expect(second!.left).toBeLessThan(second!.track);
+      expect(second!.fill).toBeLessThanOrEqual(second!.track);
+    });
+
+    test("the standing index names the current step in text, not weight alone", async ({
+      page,
+    }) => {
+      // Font weight is the visual cue; on its own that is meaning by style. A visually-hidden
+      // word carries the same fact for anyone not seeing the weight.
+      const index = page.locator("form aside");
+      await expect(index).toHaveCount(1);
+      await expect(index.getByRole("listitem").filter({ hasText: "Contact" })).toContainText(
+        "(current step)"
+      );
+      // ...and it must move with the step, not stay pinned to the first item.
+      await page.fill("#f-firstName", "Ada");
+      await page.fill("#f-lastName", "Lovelace");
+      await page.fill("#f-email", "ada@example.com");
+      await page.getByRole("button", { name: "Continue" }).click();
+      await expect(index.getByRole("listitem").filter({ hasText: "Journey" })).toContainText(
+        "(current step)"
+      );
+      await expect(index.getByRole("listitem").filter({ hasText: "Contact" })).not.toContainText(
+        "(current step)"
+      );
+    });
+  });
+
+  /**
+   * Reduced motion must not leave the progress device stranded. The transition is removed, but
+   * the mark still has to be in the right place - a progress indicator that does not move is
+   * worse than one that jumps, because it reports the wrong step.
+   */
+  test("under reduced motion the progress mark still lands on the new step", async ({
+    browser,
+  }) => {
+    const ctx = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await ctx.newPage();
+    await page.goto("/begin-planning");
+    test.skip(!(await formIsPresent(page)), "built without delivery env vars; form not rendered");
+
+    const markLeft = () =>
+      page.evaluate(() => {
+        const mark = document.querySelector(".inquiry-progress-mark")!;
+        return Math.round(
+          mark.getBoundingClientRect().left - mark.parentElement!.getBoundingClientRect().left
+        );
+      });
+
+    const before = await markLeft();
+    await page.fill("#f-firstName", "Ada");
+    await page.fill("#f-lastName", "Lovelace");
+    await page.fill("#f-email", "ada@example.com");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(stepLabel(page)).toContainText("Step 2 of 6");
+    // No transition to wait out: it should already be there.
+    expect(await markLeft()).toBeGreaterThan(before);
+    await ctx.close();
   });
 });

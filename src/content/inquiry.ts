@@ -298,6 +298,14 @@ export const inquiryCopy = {
   continueLabel: "Continue",
   backLabel: "Back",
   errorSummaryHeading: "There is something to fix",
+  /**
+   * The standing index beside the form. It exists so a 25-field inquiry shows its whole shape
+   * up front rather than revealing it a step at a time — someone who can see there are six
+   * short groups is far likelier to finish than someone who cannot tell how much is left. [D]
+   */
+  stepIndexHeading: "What we will ask",
+  /** Marks the current step for screen readers; weight alone would be style-only meaning. */
+  currentStepSuffix: " (current step)",
   /** Shown when delivery fails. Never a false success — the answers stay on screen. */
   deliveryFailed:
     "We could not deliver your inquiry just now. Nothing is lost — your answers are still here.",

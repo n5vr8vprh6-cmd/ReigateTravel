@@ -307,6 +307,19 @@
   }
 }
 
+/* The incoming inquiry step settles into place. Transform-only, like every other reveal here:
+   the step is fully readable for the whole animation, it just arrives. No `key` remount drives
+   this - steps must stay mounted so answers survive Back - so it runs off the `hidden`
+   attribute being removed, which restarts animations on a newly displayed element. */
+@keyframes step-enter {
+  from {
+    translate: 0 0.75rem;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
 @keyframes draw-rule {
   from {
     stroke-dashoffset: 100;
@@ -317,6 +330,42 @@
 }
 
 @layer components {
+  /* ---------------------------------------------------------------------------
+     The inquiry progress device. Six hairline ticks were a progress bar like any
+     other; this is the brand's own mark travelling along a track as the visitor
+     advances, which is the one thing on the form nobody else's form has.
+
+     The mark is NOT stretched to the track's width. `HorizonRule` keeps
+     `preserveAspectRatio`, so scaling it across 38rem would either letterbox it or
+     flatten the wave inflection that is the whole point of the device. It stays at
+     its natural size and moves instead, so the geometry is never distorted.
+
+     `rule-fill` was considered for the fill and does not fit: it is an animation
+     driven by the pinned Method's scroll timeline, and this is a state change that
+     needs to interpolate between two positions on demand. A transition is the right
+     tool; reusing the keyframe would have meant restarting it on every step.
+
+     --inquiry-progress is a 0..1 fraction set inline from the step index. The mark
+     travels within (100% - its own width) so it never hangs off either end, and the
+     fill stops at the mark's centre rather than under its leading edge.
+     -------------------------------------------------------------------------- */
+  .inquiry-progress-fill {
+    width: calc(var(--inquiry-progress) * (100% - 2.5rem) + 1.25rem);
+    transition: width var(--duration-slow) var(--ease-calm);
+  }
+  .inquiry-progress-mark {
+    left: calc(var(--inquiry-progress) * (100% - 2.5rem));
+    transition: left var(--duration-slow) var(--ease-calm);
+  }
+
+  /* Scoped to the enhanced form on purpose. Without JavaScript no step is hidden, so
+     `:not([hidden])` would match all six and animate the entire form on load. */
+  @media (prefers-reduced-motion: no-preference) {
+    form[data-enhanced="true"] .inquiry-step:not([hidden]) {
+      animation: step-enter var(--duration-slow) var(--ease-calm) both;
+    }
+  }
+
   /* The load entrance sits one level INSIDE each `.hero-layer` wrapper. The scroll lift is on
      the wrapper itself. `animation` is a single property, so two rules targeting one element
      cannot both apply — the more specific one silently replaces the other. Keeping them on
@@ -757,6 +806,12 @@
   .method-frame {
     position: static !important;
     min-height: 0 !important;
+  }
+  /* The progress mark jumps to the new step rather than travelling to it. It must still be
+     in the right place - a stalled progress device is worse than one that does not move. */
+  .inquiry-progress-fill,
+  .inquiry-progress-mark {
+    transition: none !important;
   }
   /* Rules land fully drawn — a part-filled rule implies a step half-completed. */
   .method-rule {
