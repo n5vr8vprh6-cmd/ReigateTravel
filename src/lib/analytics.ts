@@ -10,10 +10,14 @@
  * (`/blog/[slug]` rather than `/blog/my-post`) — and this site has no dynamic routes at all, so
  * there is nothing to gain. What ships is the same script the package would have loaded.
  *
- * **Gated, and off by default.** Vercel Web Analytics is not enabled on the project — the
- * script route returns 404 — so loading it unconditionally would put a failed request and a
- * console error on every page. The gate mirrors `indexingAllowed` in `seo.ts`: opt in
- * explicitly on the deployment where it is true, and everywhere else this is inert.
+ * **Gated, and off by default.** The gate mirrors `indexingAllowed` in `seo.ts`: opt in
+ * explicitly on the deployment where it is true, and everywhere else this is inert. It exists
+ * because the script route 404s until Web Analytics is switched on for the project, and pointing
+ * a tag at that would cost a failed request and a console error on every page for no data.
+ *
+ * Worth knowing for the next environment: enabling the product is not enough on its own. The
+ * route is baked into a deployment's routing config, so an existing deployment keeps 404ing
+ * until it is rebuilt — enable it, set the flag, then redeploy, in that order.
  *
  * **It must never see an answer.** The consent copy tells the visitor their answers are emailed
  * to Tyler and "not stored on this website" — and missing-inputs #12 rests on every clause of
@@ -23,8 +27,21 @@
  * scans the form's source to prove no answer value reaches them.
  */
 
-/** True only where explicitly opted in. Unset or any other value keeps analytics off. */
-export const analyticsEnabled = process.env.NEXT_PUBLIC_ANALYTICS === "true";
+/**
+ * True only where explicitly opted in. Unset or any other value keeps analytics off.
+ *
+ * Trimmed and lowercased, and that is not fussiness — the first time this flag was set for real
+ * it was stored as `TRUE`, a strict `=== "true"` rejected it, and the result was a deployment
+ * that looked correct in every way while measuring nothing. This value is typed into a dashboard
+ * field by a person, so `TRUE`, `True` and a stray trailing space all have to mean what they
+ * obviously mean. Anything that is not the word "true" still leaves analytics off.
+ *
+ * `indexingAllowed` in `seo.ts` is deliberately NOT relaxed the same way. The failure directions
+ * are opposite: a mis-cased value here means silently collecting nothing, which is merely
+ * useless, while there it means a preview deployment silently becoming indexable. Strictness is
+ * the safe default in one and the trap in the other.
+ */
+export const analyticsEnabled = process.env.NEXT_PUBLIC_ANALYTICS?.trim().toLowerCase() === "true";
 
 /** Served by Vercel itself once Web Analytics is enabled for the project. */
 export const ANALYTICS_SCRIPT_SRC = "/_vercel/insights/script.js";

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   analyticsEnabled,
   analyticsEvents,
@@ -27,6 +27,35 @@ describe("analytics", () => {
   it("is off unless explicitly switched on", () => {
     // The test environment sets nothing, which is also what production ships as today.
     expect(analyticsEnabled).toBe(false);
+  });
+
+  /**
+   * This exists because of a real incident. The flag was set for the first time and stored as
+   * `TRUE`; a strict `=== "true"` rejected it, and the deployment looked entirely correct while
+   * measuring nothing — no error, no failed request, just no data. The value is typed into a
+   * dashboard by a person, so the casing they use has to not matter.
+   */
+  describe("the gate reads a human-entered value", () => {
+    const read = async (value: string | undefined) => {
+      vi.resetModules();
+      if (value === undefined) vi.stubEnv("NEXT_PUBLIC_ANALYTICS", "");
+      else vi.stubEnv("NEXT_PUBLIC_ANALYTICS", value);
+      const mod = await import("@/lib/analytics");
+      return mod.analyticsEnabled;
+    };
+
+    afterEach(() => vi.unstubAllEnvs());
+
+    it.each(["true", "TRUE", "True", " true ", "true\n"])("%j switches it on", async (value) => {
+      expect(await read(value)).toBe(true);
+    });
+
+    it.each(["", "false", "FALSE", "1", "yes", "truthy", "no"])(
+      "%j leaves it off",
+      async (value) => {
+        expect(await read(value)).toBe(false);
+      }
+    );
   });
 
   it("sends nothing at all while it is off", async () => {
