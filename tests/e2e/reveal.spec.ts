@@ -224,14 +224,81 @@ test.describe("Scroll motion never hides content", () => {
       // Silent and inline, or a phone will either blare audio or take over the screen.
       await expect(v).toHaveJSProperty("muted", true);
       await expect(v).toHaveAttribute("playsinline", "");
-      // A poster means the band is never empty, including where autoplay is refused.
-      await expect(v).toHaveAttribute("poster", /.+/);
+      // The band must never be empty, including where autoplay is refused - but that is no
+      // longer a `poster` attribute. A poster is fetched eagerly no matter what `preload`
+      // says, which put 57KB of a below-the-fold band inside the hero's LCP window. It is a
+      // lazily-loaded image behind the video now, so what is asserted is the guarantee (a
+      // still is present) rather than the mechanism that used to provide it.
+      expect(
+        await v.getAttribute("poster"),
+        "an eager poster reopens the LCP regression"
+      ).toBeNull();
+      const still = v.locator("xpath=preceding-sibling::img[1]");
+      await expect(still, "the band needs a still behind the video").toHaveCount(1);
       // preload="none" is what makes the fetch lazy; `autoplay` would defeat it.
       await expect(v).toHaveAttribute("preload", "none");
       expect(await v.getAttribute("autoplay"), "autoplay would fetch eagerly").toBeNull();
       // Decorative, so it must not be announced or reachable by keyboard.
       await expect(v).toHaveAttribute("aria-hidden", "true");
     }
+  });
+
+  test("the interlude still never competes with the hero image", async ({ browser }) => {
+    // The regression this guards: a `poster` attribute ignores `preload="none"` and downloads
+    // eagerly at high priority, so 57KB for a band several screens down landed inside the hero's
+    // LCP window on every visit. Replacing it with a lazily-loaded image took LCP from a median
+    // 1632ms to 1396ms on throttled mobile, across three runs each.
+    //
+    // What is asserted is "not before the hero", not "not at all". Both were measured, and the
+    // behaviour splits by connection: on Slow 4G the still is genuinely never fetched while it is
+    // off-screen, but on a fast connection it does load early - just at low priority, after the
+    // hero has finished, and at 15KB rather than 57KB because next/image serves AVIF. Asserting
+    // "never fetched" would encode the slow-connection case as though it were universal and fail
+    // on any fast run. The guarantee that actually protects LCP is the ordering.
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await ctx.newPage();
+    await homepage(page);
+
+    const timing = await page.evaluate(() => {
+      const res = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
+      const still = res.find((r) => /coastline-poster/.test(r.name));
+      // The hero photograph is the first image the page requests and is the LCP element.
+      const hero = res
+        .filter((r) => r.name.includes("/_next/image"))
+        .sort((a, b) => a.startTime - b.startTime)[0];
+      return {
+        heroEnd: hero ? hero.responseEnd : null,
+        stillStart: still ? still.startTime : null,
+        stillKb: still ? Math.round((still.transferSize || 0) / 1024) : null,
+      };
+    });
+
+    expect(timing.heroEnd, "the hero image should have loaded").not.toBeNull();
+
+    if (timing.stillStart !== null) {
+      expect(
+        timing.stillStart,
+        "the interlude still must not begin loading until the hero image is done"
+      ).toBeGreaterThanOrEqual(timing.heroEnd!);
+      // next/image serves this as AVIF; the raw file is 57KB. A jump back to that size means
+      // someone routed around next/image and the format conversion went with it.
+      expect(timing.stillKb, "the still should be format-converted, not the raw JPEG").toBeLessThan(
+        40
+      );
+    }
+
+    // Whether or not it loaded early, it must be there by the time the band is reached.
+    await page.locator("video").first().scrollIntoViewIfNeeded();
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() =>
+            performance.getEntriesByType("resource").some((r) => /coastline-poster/.test(r.name))
+          ),
+        { message: "the still must load as the band is reached" }
+      )
+      .toBe(true);
+    await ctx.close();
   });
 
   test("the interlude clip plays when reached, and not under reduced motion", async ({

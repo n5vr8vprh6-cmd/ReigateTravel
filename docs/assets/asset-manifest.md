@@ -45,7 +45,15 @@ out smaller here (0.28MB against 0.66MB) and needs no fallback source.
 `preload="none"`, no `autoplay` attribute, no `loop`. It is started by an IntersectionObserver
 when the band is on screen and holds on its last frame, so it costs nothing on arrival and never
 snaps the push-in back to the start. Under `prefers-reduced-motion` it is never started and
-never downloaded, and the poster carries the band.
+never downloaded, and the still carries the band.
+
+**The still is not a `poster` attribute**, and that distinction is load-bearing. A poster is
+fetched eagerly no matter what `preload` says: measured, it began loading at 20.6ms while the
+hero photograph was still arriving at 160.2ms, so 57KB for a band several screens down was
+competing with the LCP element on every visit. It is a lazily-loaded `next/image` behind the
+video now — the same frame-0 image, so nothing changes visually — which on a slow connection is
+never fetched while off-screen and on a fast one loads late, at low priority, and as 15KB of AVIF
+rather than 57KB of JPEG. Guarded by `tests/e2e/reveal.spec.ts`.
 
 ## Founder portrait → `public/images/`
 
