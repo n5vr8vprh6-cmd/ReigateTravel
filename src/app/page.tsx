@@ -132,6 +132,7 @@ export default function HomePage() {
                 heading={home.method.heading}
                 headingId="method-heading"
                 size="statement"
+                revealByWord
               />
             </div>
             <ProcessSteps />

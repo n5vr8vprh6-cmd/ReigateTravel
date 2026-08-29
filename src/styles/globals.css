@@ -320,6 +320,16 @@
   }
 }
 
+/* One word rising into place behind its mask. Transform-only, like every reveal here. */
+@keyframes word-rise {
+  from {
+    translate: 0 110%;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
 @keyframes draw-rule {
   from {
     stroke-dashoffset: 100;
@@ -476,6 +486,20 @@
   .horizon-rule path {
     stroke-dasharray: 100;
     stroke-dashoffset: 0;
+  }
+
+  /* Word-by-word heading reveal. The mask is structural and always present; only the motion
+     below is gated, so an unrun animation leaves an ordinary, fully readable heading.
+
+     The padding/negative-margin pair extends the clip box below the baseline without moving
+     anything. At `--text-statement`'s 1.06 line-height the inline-block box is tighter than the
+     glyphs, and without it `overflow: hidden` shaves the descender off words like "Thoughtful". */
+  .word-mask {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    padding-bottom: 0.16em;
+    margin-bottom: -0.16em;
   }
 
   /* ---------------------------------------------------------------------------
@@ -742,6 +766,38 @@
           transform-origin: top;
         }
       }
+      /* ---------------------------------------------------------------------------
+         Word-by-word heading reveal.
+
+         The timeline is NAMED and declared on the heading, never anonymous on the word.
+         `.word-mask` sets `overflow: hidden`, which makes it a scroll container — so an
+         anonymous `view()` on the word measures against its own mask, where the word is
+         always fully visible, and every word sits at a constant progress forever. Measured:
+         all words pinned at one value at every scroll position until the timeline was named.
+         Same lesson as the editorial images two rules down.
+
+         The range deliberately mixes `entry` and `cover`. The note on the journey thread warns
+         against mixing phases, and that warning is about ITS geometry: a band-height element
+         whose mixed range was already complete wherever it was sampled. A heading is short —
+         `entry` alone spans only the heading's own height, so the whole cascade fires within
+         about 50px of scroll and reads as a single flash. Verified across six scroll positions:
+         mixed gives a real cascade (110/110/110 -> 25/43/56/66/74 -> settled), single-phase
+         does not.
+
+         --w is the word's stagger offset as a plain number, set inline by WordReveal. It is
+         normalised against the word count there so every heading cascades over the same
+         distance regardless of length.
+         -------------------------------------------------------------------------- */
+      .word-reveal {
+        view-timeline-name: --word-frame;
+      }
+      .word-rise {
+        display: inline-block;
+        animation: word-rise linear both;
+        animation-timeline: --word-frame;
+        animation-range: entry calc(var(--w) * 1%) cover calc(20% + var(--w) * 1%);
+      }
+
       .hero-drift {
         animation: hero-zoom linear both;
         animation-timeline: --hero-frame;
@@ -806,6 +862,12 @@
   .method-frame {
     position: static !important;
     min-height: 0 !important;
+  }
+  /* Words sit where they belong. A heading caught mid-cascade is unreadable, and that is a
+     worse failure than no animation. */
+  .word-rise {
+    animation: none !important;
+    translate: none !important;
   }
   /* The progress mark jumps to the new step rather than travelling to it. It must still be
      in the right place - a stalled progress device is worse than one that does not move. */

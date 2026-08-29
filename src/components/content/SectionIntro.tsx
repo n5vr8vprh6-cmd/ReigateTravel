@@ -1,5 +1,6 @@
 import { cn } from "@/lib/cn";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { WordReveal } from "@/components/content/WordReveal";
 
 type Size = "statement" | "default" | "sm";
 
@@ -30,6 +31,13 @@ interface SectionIntroProps {
    * the homepage that had one.
    */
   as?: "h1" | "h2" | "h3";
+  /**
+   * Reveal the heading word by word as it scrolls in, rather than as one block. Opt-in and
+   * off by default: this is for statement-scale narrative beats, and applying it to every
+   * heading would turn a gesture into a tic. The heading must be plain text — `WordReveal`
+   * cannot preserve a link or inline markup through the split.
+   */
+  revealByWord?: boolean;
 }
 
 /** Reusable heading cluster: eyebrow rule + heading + optional lead. */
@@ -43,6 +51,7 @@ export function SectionIntro({
   className,
   size = "default",
   as: Heading = "h2",
+  revealByWord = false,
 }: SectionIntroProps) {
   return (
     <div className={cn(align === "center" && "mx-auto max-w-[44rem] text-center", className)}>
@@ -53,9 +62,15 @@ export function SectionIntro({
       ) : null}
       <Heading
         id={headingId}
-        className={cn(Heading === "h3" ? "text-h3" : sizeClass[size], inverse && "text-ivory")}
+        className={cn(
+          Heading === "h3" ? "text-h3" : sizeClass[size],
+          inverse && "text-ivory",
+          // Carries the named view timeline the words animate on. Structural only — with the
+          // animation ungated or unrun, this class does nothing on its own.
+          revealByWord && "word-reveal"
+        )}
       >
-        {heading}
+        {revealByWord ? <WordReveal text={heading} /> : heading}
       </Heading>
       {lead ? (
         <p

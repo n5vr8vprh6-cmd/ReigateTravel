@@ -54,7 +54,7 @@ test.describe("Scroll motion never hides content", () => {
       for (const link of links) {
         const css = await fetch(link.href).then((r) => r.text());
         for (const m of css.matchAll(
-          /@keyframes\s+(rise-in|image-parallax|hero-zoom|cta-converge|stage-rise|interlude-drift)\s*\{/g
+          /@keyframes\s+(rise-in|image-parallax|hero-zoom|cta-converge|stage-rise|interlude-drift|word-rise)\s*\{/g
         )) {
           // Grab the keyframe body and check it never touches opacity.
           const start = m.index! + m[0].length;
@@ -488,6 +488,93 @@ test.describe("Scroll motion never hides content", () => {
     await ctx.close();
   });
 
+  /**
+   * Word-by-word reveal on the Method heading. The risk is not that it fails to animate — it is
+   * that splitting a heading into spans quietly breaks what the heading is for.
+   */
+  test.describe("the Method heading reveals word by word", () => {
+    test("the split preserves the heading accessible name exactly", async ({ page }) => {
+      await homepage(page);
+      const heading = page.locator("#method-heading");
+      // Separate spans, but the name must still be the original sentence, spaces and all.
+      // This is what breaks first if the spaces are moved inside the masks.
+      expect(await heading.evaluate((h) => h.textContent)).toBe(
+        "Thoughtful travel begins by understanding the person before recommending the place."
+      );
+      const hidden = await heading.evaluate(
+        (h) =>
+          [...h.querySelectorAll(".word-rise, .word-mask")].filter(
+            (w) => w.getAttribute("aria-hidden") === "true"
+          ).length
+      );
+      expect(hidden, "split words must stay in the accessibility tree").toBe(0);
+    });
+
+    test("the words arrive in sequence, not together", async ({ page }) => {
+      await homepage(page);
+      const top = await page.evaluate(
+        () => document.querySelector("#method-heading")!.getBoundingClientRect().top + scrollY
+      );
+
+      // Scanned rather than sampled at fixed offsets. The cascade window is a function of
+      // viewport height, so a hardcoded scroll position that is mid-cascade at 1440x900 is
+      // still fully hidden at the runner default - which is exactly how the first version of
+      // this test failed. What matters is the property, not where it happens.
+      const frames: number[][] = [];
+      for (let d = -1100; d <= 600; d += 100) {
+        await page.evaluate((y) => window.scrollTo(0, y), top + d);
+        await page.waitForTimeout(120);
+        frames.push(
+          await page.evaluate(() =>
+            [...document.querySelectorAll("#method-heading .word-rise")].map((e) => {
+              const m = getComputedStyle(e).translate.match(/([0-9.]+)%/);
+              return m ? Number(m[1]) : 0;
+            })
+          )
+        );
+      }
+
+      expect(frames[0].length, "the heading should be split into words").toBeGreaterThan(5);
+      expect(
+        frames.some((f) => f.every((v) => v > 50)),
+        "there must be a point where every word is still behind its mask"
+      ).toBe(true);
+      // The cascade itself: some frame where the leading word is further along than the
+      // trailing one, across several distinct values. One shared value at every frame would
+      // mean the per-word stagger is not being applied at all.
+      expect(
+        frames.some((f) => f[0] < f[f.length - 1] && new Set(f).size > 3),
+        "there must be a point where the words are staggered, not moving as one"
+      ).toBe(true);
+      expect(
+        frames[frames.length - 1].every((v) => v === 0),
+        "every word settles once the heading is past"
+      ).toBe(true);
+    });
+    test("under reduced motion no word is ever mid-rise", async ({ browser }) => {
+      const ctx = await browser.newContext({ reducedMotion: "reduce" });
+      const page = await ctx.newPage();
+      await homepage(page);
+      const top = await page.evaluate(
+        () => document.querySelector("#method-heading")!.getBoundingClientRect().top + scrollY
+      );
+      // Sampled where the cascade would otherwise be in full flight.
+      for (const d of [-900, -500, -250, 300]) {
+        await page.evaluate((y) => window.scrollTo(0, y), top + d);
+        await page.waitForTimeout(200);
+        const t = await page.evaluate(() =>
+          [...document.querySelectorAll("#method-heading .word-rise")].map(
+            (e) => getComputedStyle(e).translate
+          )
+        );
+        expect(
+          t.every((v) => v === "none"),
+          "settled at offset " + d + ": " + t.join(",")
+        ).toBe(true);
+      }
+      await ctx.close();
+    });
+  });
   test("reduced motion leaves everything settled and readable", async ({ browser }) => {
     const ctx = await browser.newContext({ reducedMotion: "reduce" });
     const page = await ctx.newPage();
