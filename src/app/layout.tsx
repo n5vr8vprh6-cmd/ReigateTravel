@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { VercelAnalytics } from "@/components/analytics/VercelAnalytics";
 import { baseMetadata, baseViewport, organizationJsonLd } from "@/lib/seo";
 
 const cormorant = Cormorant_Garamond({
@@ -42,6 +43,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           // Structured data uses approved facts only (see lib/seo.ts).
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
+        {/* Renders nothing unless NEXT_PUBLIC_ANALYTICS is "true". Last in the body so it is
+            the last thing considered, which is also how much weight it should carry. */}
+        <VercelAnalytics />
       </body>
     </html>
   );

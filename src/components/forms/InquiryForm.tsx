@@ -10,6 +10,13 @@ import { TextLink } from "@/components/ui/TextLink";
 import { inquirySteps, inquiryConsent, inquiryCopy } from "@/content/inquiry";
 import { validateInquiry, stepIndexOfField, type FieldErrors } from "@/lib/validation/inquiry";
 import { HONEYPOT_FIELD, RENDERED_AT_FIELD } from "@/lib/forms/spam";
+import {
+  analyticsEvents,
+  inquiryBlockedPayload,
+  inquiryStepPayload,
+  inquirySubmittedPayload,
+  trackEvent,
+} from "@/lib/analytics";
 import { site } from "@/content/site";
 import { cn } from "@/lib/cn";
 
@@ -58,6 +65,14 @@ export function InquiryForm() {
   useEffect(() => {
     setEnhanced(true);
     setRenderedAt(String(Date.now()));
+    // Step 1 is reported here rather than left implicit. `goTo` only fires on advance, so
+    // without this the first rung of the funnel would have to be inferred from the page view
+    // count for /begin-planning — a different series, counted a different way, and awkward to
+    // compare against. Firing it makes all six steps one self-contained series.
+    trackEvent(
+      analyticsEvents.inquiryStepReached,
+      inquiryStepPayload(0, inquirySteps[0]?.name ?? "")
+    );
   }, []);
 
   // A rejected submit jumps to the earliest step that actually has a problem, rather than
@@ -68,6 +83,20 @@ export function InquiryForm() {
     setStep(Math.min(...names.map(stepIndexOfField)));
     summaryRef.current?.focus();
   }, [state]);
+
+  // Why a submission did not go through. `state.status` only — never a validation message, and
+  // never a field name: a message can quote what was typed, and a field name says which
+  // question someone struggled with, neither of which analytics has any business seeing.
+  useEffect(() => {
+    if (state.status === "idle") return;
+    trackEvent(analyticsEvents.inquiryBlocked, inquiryBlockedPayload(state.status));
+  }, [state.status]);
+
+  // Send was pressed. Not a success — the server can still reject it, and the redirect to
+  // /begin-planning/received is what marks one.
+  useEffect(() => {
+    if (pending) trackEvent(analyticsEvents.inquirySubmitted, inquirySubmittedPayload(step + 1));
+  }, [pending, step]);
 
   const errors: FieldErrors = { ...state.fieldErrors, ...clientErrors };
   const currentStepErrorNames = Object.keys(errors).filter(
@@ -100,6 +129,10 @@ export function InquiryForm() {
 
   function goTo(index: number) {
     setStep(index);
+    trackEvent(
+      analyticsEvents.inquiryStepReached,
+      inquiryStepPayload(index, inquirySteps[index]?.name ?? "")
+    );
     // Focus the heading so the new step is announced and the keyboard lands in the right place.
     requestAnimationFrame(() => headingRefs.current[index]?.focus());
   }
