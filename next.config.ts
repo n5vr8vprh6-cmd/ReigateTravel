@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   images: {
     // All Version 1 imagery is local, optimized editorial PNG. No remote patterns.
     formats: ["image/avif", "image/webp"],
+    // Next 16 requires every quality passed to next/image to be declared here.
+    // 75 is next/image's default and what every component except one relies on;
+    // 58 is the deliberate lower setting on the ScrollSequence sprite strip
+    // (see the comment above `quality={58}` in ScrollSequence.tsx).
+    qualities: [58, 75],
   },
   experimental: {
     // Route changes are same-document under the App Router, so the CSS-only
