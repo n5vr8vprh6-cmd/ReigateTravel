@@ -29,6 +29,26 @@ outside approved variants, cropped, stretched, or effect-laden.
 | `oakville-horizon.png` | §7 Community (State B) | Approved (editorial) | 1680×720 | "The Lake Ontario horizon seen from the Oakville waterfront." |
 | `botanical-shadow.png` | §10 Newsletter (background texture) | Approved (editorial) | 1344×896 | decorative (empty alt) |
 
+## Scroll sequences → `public/images/`
+
+Vertical sprite strips: every frame of a short clip stacked into one image, stepped one frame at
+a time by a scroll timeline. No video ships with the site. Each strip's source still stays in
+`public/images/` as the frame-0 image and as the fallback wherever the animation does not run.
+
+| Strip | Source still | Homepage use | Frames | Frame size | Approval |
+|---|---|---|---|---|---|
+| `stairs-sequence.jpg` | `arched-doorway.png` | §2 Clear explanation | 24 | 512×640 | Approved (editorial) |
+| `sailboat-sequence.jpg` | `oakville-horizon.png` | §7 Community | 20 | 1024×574 | Approved (editorial) |
+| `coastline-sequence.jpg` | `mediterranean-coastline.png` | Interlude after §4 | 24 | 1024×576 | Approved (editorial) |
+
+Generated with Kling from the approved still, then extracted with
+`scripts/extract-sequence.mjs`. Alt text follows the source still, and is empty where the strip
+is decorative — the coastline interlude carries no information the surrounding copy depends on.
+
+The frame count is not free: `steps()` cannot take a custom property, so `globals.css` keys the
+step count off a `data-frames` attribute and only 20 and 24 have rules. A strip with any other
+count silently does not step.
+
 ## Fonts
 
 | Family | Role | Source | Loading |

@@ -106,10 +106,21 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* Interlude — a full screen of coastline between the commercial act and the method.
-          No copy, no CTA, nothing to read: it exists to change the page's tempo. See
-          docs/decisions/decision-log.md #36. */}
-      <Interlude src="/images/mediterranean-coastline.png" position="50% 55%" />
+      {/* Interlude — the coastline between the commercial act and the method. No copy, no CTA,
+          nothing to read: it exists to change the page's tempo (decision-log #36).
+          Now scroll-scrubbed rather than a still, so the sea moves as the visitor descends and
+          runs back the other way on the way up. Rendered bare rather than inside a Section
+          because it deliberately has no band padding, exactly as the still did. The trade-off
+          is height: the band is now the frame's own 16:9 rather than a full 100svh, so on a
+          phone this is a band rather than a full screen. */}
+      <ScrollSequence
+        src={home.coastline.src}
+        alt={home.coastline.alt}
+        frames={home.coastline.frames}
+        frameWidth={home.coastline.frameWidth}
+        frameHeight={home.coastline.frameHeight}
+        sizes="100vw"
+      />
 
       {/* 5 — The Reigate Method (process proof). The page's pinned moment — the frame holds
           while the five stages advance. Earned rather than decorative: these stages are a

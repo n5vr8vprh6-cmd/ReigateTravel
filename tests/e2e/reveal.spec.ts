@@ -242,6 +242,60 @@ test.describe("Scroll motion never hides content", () => {
     expect(await read(top - 950)).toBe(down[0]);
   });
 
+  // The stairs test above is pinned to one sequence at specific offsets. This one covers every
+  // sequence on the page generically, so a newly added strip is exercised without anyone
+  // remembering to write a bespoke test for it.
+  test("every scroll sequence advances with scroll and is symmetric coming back", async ({
+    page,
+  }) => {
+    await homepage(page);
+    // The page sets `scroll-behavior: smooth`, so an un-disabled scrollTo samples mid-animation
+    // and reads back garbage. This cost an hour once; disable it before measuring.
+    await page.addStyleTag({ content: "html{scroll-behavior:auto !important}" });
+
+    const count = await page.locator(".sequence-frame").count();
+    expect(count, "expected at least one scroll sequence").toBeGreaterThan(0);
+
+    for (let i = 0; i < count; i++) {
+      const frames = Number(
+        await page.locator(".sequence-frame").nth(i).getAttribute("data-frames")
+      );
+      // globals.css only defines steps() for these counts; any other silently does not step.
+      expect([20, 24], `sequence ${i} has an unsupported frame count`).toContain(frames);
+
+      const top = await page.evaluate(
+        (n) =>
+          Math.round(
+            document.querySelectorAll(".sequence-frame")[n]!.getBoundingClientRect().top + scrollY
+          ),
+        i
+      );
+      const at = async (offset: number) => {
+        await page.evaluate((y) => window.scrollTo(0, y), top + offset);
+        await page.waitForTimeout(220);
+        const t = await page.evaluate(
+          (n) => getComputedStyle(document.querySelectorAll(".sequence-strip")[n]!).translate,
+          i
+        );
+        if (t === "none") return 0;
+        const pct = parseFloat(t.trim().split(/\s+/)[1] ?? "0");
+        return Math.round(-pct / (100 / frames));
+      };
+
+      const offsets = [-700, -400, -100, 200];
+      const down: number[] = [];
+      for (const o of offsets) down.push(await at(o));
+      const up: number[] = [];
+      for (const o of [...offsets].reverse()) up.push(await at(o));
+
+      expect(new Set(down).size, `sequence ${i} never advanced`).toBeGreaterThan(1);
+      expect(down[0]!, `sequence ${i} ran backwards`).toBeLessThan(down[down.length - 1]!);
+      // The whole reason for a scroll timeline over a playhead: position determines the frame,
+      // so the same scroll position must give the same frame in either direction.
+      expect(up.reverse(), `sequence ${i} was not symmetric`).toEqual(down);
+    }
+  });
+
   test("the stairs sequence rests on a whole frame, never mid-stride", async ({ browser }) => {
     const ctx = await browser.newContext({ reducedMotion: "reduce" });
     const page = await ctx.newPage();
