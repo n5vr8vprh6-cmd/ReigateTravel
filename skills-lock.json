@@ -19,6 +19,12 @@
       "skillPath": "skills/apple-design/SKILL.md",
       "computedHash": "0d19303902efa64eace10e6b183eb29ef3220d424c1a7fd1eafc52adde216932"
     },
+    "awwwards": {
+      "source": "tponscr-debug/claude-skill-awwwards",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "b02eb0220a3538e31ac14dfb3c6d3f99786c59acb5b6130fb9519c794c6f5f0b"
+    },
     "brandkit": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
