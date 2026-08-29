@@ -131,3 +131,21 @@ test("faq structured data matches what the page renders", async ({ page }) => {
     );
   }
 });
+
+for (const { name, width, height } of widths) {
+  test(`about has no serious/critical a11y violations @ ${name} (${width}px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto("/about");
+    await page.waitForSelector("h1", { state: "visible" });
+    await page.evaluate(async () => {
+      const step = Math.max(200, window.innerHeight);
+      for (let y = 0; y < document.body.scrollHeight; y += step) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      window.scrollTo(0, 0);
+    });
+    await page.waitForTimeout(600);
+    await scan(page, `on /about @ ${name}`);
+  });
+}
