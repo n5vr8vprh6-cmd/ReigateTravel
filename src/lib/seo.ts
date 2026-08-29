@@ -58,3 +58,24 @@ export function organizationJsonLd() {
     areaServed: "Greater Toronto Area",
   };
 }
+
+/**
+ * FAQPage structured data.
+ *
+ * Built from the same content the page renders, never from a separate list — search engines
+ * require the answers to be visible on the page, and two sources would drift. Same restraint as
+ * the organization block above: it describes what is on the page and asserts nothing extra.
+ */
+export function faqJsonLd(groups: readonly { items: readonly { q: string; a: string }[] }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: groups.flatMap((group) =>
+      group.items.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      }))
+    ),
+  };
+}

@@ -95,3 +95,39 @@ test("travel-planning has exactly one h1 and no skipped heading levels", async (
     ).toBeLessThanOrEqual(1);
   }
 });
+
+for (const { name, width, height } of widths) {
+  test(`faq has no serious/critical a11y violations @ ${name} (${width}px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto("/faq");
+    await page.waitForSelector("h1", { state: "visible" });
+    await page.evaluate(async () => {
+      const step = Math.max(200, window.innerHeight);
+      for (let y = 0; y < document.body.scrollHeight; y += step) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      window.scrollTo(0, 0);
+    });
+    await page.waitForTimeout(600);
+    await scan(page, `on /faq @ ${name}`);
+  });
+}
+
+test("faq structured data matches what the page renders", async ({ page }) => {
+  await page.goto("/faq");
+  const blocks = await page.$$eval('script[type="application/ld+json"]', (els) =>
+    els.map((e) => JSON.parse(e.textContent ?? "{}"))
+  );
+  const faqBlock = blocks.find((b) => b["@type"] === "FAQPage");
+  expect(faqBlock, "an FAQPage block should be present").toBeTruthy();
+
+  // Google requires the answers to be visible on the page. Assert it rather than assume it:
+  // schema that describes content the visitor cannot see is the thing that earns a penalty.
+  const visible = (await page.locator("main").innerText()).toLowerCase();
+  for (const entry of faqBlock.mainEntity) {
+    expect(visible, `question not visible on the page: ${entry.name}`).toContain(
+      entry.name.toLowerCase()
+    );
+  }
+});
