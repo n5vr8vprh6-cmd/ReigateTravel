@@ -357,6 +357,57 @@ test.describe("Scroll motion never hides content", () => {
     }
   });
 
+  /**
+   * Sprite strips are desktop-only, and not for taste reasons. A 24-frame strip is roughly
+   * 1:30, which at 390px wide renders as a ~10,000px-tall layer — past the 4096-8192px texture
+   * limit common on mobile GPUs, where the browser falls back to software rasterisation and the
+   * scroll goes choppy. next/image cannot serve it sensibly either: a full-resolution resize
+   * would be 36,000px tall, so it clamps, and a DPR-3 phone was measured receiving a 166px-wide
+   * image to fill 390 CSS px.
+   *
+   * Below lg the frame-0 still renders instead and the strip is never downloaded.
+   */
+  test("phones get the still, never the sprite strip", async ({ browser }) => {
+    const ctx = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      deviceScaleFactor: 3,
+      isMobile: true,
+      hasTouch: true,
+    });
+    const page = await ctx.newPage();
+    const stripRequests: string[] = [];
+    page.on("response", (r) => {
+      if (/(stairs|sailboat)-sequence/.test(r.url())) stripRequests.push(r.url());
+    });
+
+    await homepage(page);
+    await page.evaluate(async () => {
+      for (let y = 0; y < document.body.scrollHeight; y += 500) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 100));
+      }
+    });
+    await page.waitForTimeout(1500);
+
+    const visibleStrips = await page.evaluate(
+      () =>
+        [...document.querySelectorAll(".sequence-frame")].filter((e) => e.checkVisibility()).length
+    );
+    expect(visibleStrips, "no sprite strip may render on a phone").toBe(0);
+    expect(stripRequests, "a phone must not download a sprite strip").toEqual([]);
+
+    // And the visitor still sees the photograph rather than an empty band.
+    const stills = await page.evaluate(
+      () =>
+        [...document.querySelectorAll("img")].filter(
+          (i) => i.checkVisibility() && /arched-doorway|oakville-horizon/.test(i.currentSrc)
+        ).length
+    );
+    expect(stills, "the frame-0 stills should render in their place").toBeGreaterThan(0);
+
+    await ctx.close();
+  });
+
   test("the stairs sequence rests on a whole frame, never mid-stride", async ({ browser }) => {
     const ctx = await browser.newContext({ reducedMotion: "reduce" });
     const page = await ctx.newPage();

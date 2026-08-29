@@ -55,6 +55,7 @@ export default function HomePage() {
               See decision-log.md #46. */}
           <ScrollSequence
             src={home.explanation.image.src}
+            still={home.explanation.image.sourceStill}
             alt={home.explanation.image.alt}
             frames={home.explanation.image.frames}
             frameWidth={home.explanation.image.frameWidth}
@@ -180,6 +181,7 @@ export default function HomePage() {
             has to be exactly one frame tall or the next frame bleeds in underneath. */}
         <ScrollSequence
           src={home.community.image.src}
+          still={home.community.image.sourceStill}
           alt={home.community.image.alt}
           frames={home.community.image.frames}
           frameWidth={home.community.image.frameWidth}
