@@ -108,29 +108,6 @@ export default function AboutPage() {
         </ol>
       </Section>
 
-      {/* Charter §2's "it will not rely on" list, published as a public commitment. It is the
-          brand's own stated position, and it explains the absence of proof a visitor might
-          otherwise expect to find on a page like this. */}
-      <Section surface="ivory" aria-labelledby="about-restraint">
-        <div className="max-w-[44rem]">
-          <SectionIntro
-            heading={about.restraint.heading}
-            headingId="about-restraint"
-            lead={about.restraint.lead}
-          />
-          <ul className="reveal-stagger mt-8">
-            {about.restraint.items.map((item) => (
-              <li
-                key={item}
-                className="border-ink/15 text-body-lg text-ink border-t py-5 last:border-b"
-              >
-                <span className="block max-w-[40rem]">{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </Section>
-
       <Section surface="inverse" size="lg" className="cta-frame" aria-labelledby="about-cta">
         <CTAPanel
           heading={about.cta.heading}

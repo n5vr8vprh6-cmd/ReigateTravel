@@ -57,6 +57,33 @@ test("the confirmation page has no serious/critical a11y violations", async ({ p
 });
 
 /**
+ * The pre-call enrichment form. A second stepped form on a second route, and every reason the
+ * inquiry is scanned applies here too — it renders the same `Field` primitives, the same error
+ * summary and the same step index, but nothing about that guarantees it composes them correctly.
+ *
+ * It is also listed in `accessibility.testedRoutes`, and `tests/unit/accessibility-content.test.ts`
+ * holds that list against this file in both directions: scanning a route the statement omits
+ * fails, and listing one that is never scanned fails too. Adding a scan here without adding the
+ * route there is a test failure, not an oversight that ships.
+ */
+for (const { name, width, height } of widths) {
+  test(`prepare has no serious/critical a11y violations @ ${name} (${width}px)`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto("/begin-planning/prepare");
+    await page.waitForSelector("h1", { state: "visible" });
+    await scan(page, `on /begin-planning/prepare @ ${name}`);
+  });
+}
+
+test("the prepare confirmation has no serious/critical a11y violations", async ({ page }) => {
+  await page.goto("/begin-planning/prepare/received");
+  await page.waitForSelector("h1", { state: "visible" });
+  await scan(page, "on /begin-planning/prepare/received");
+});
+
+/**
  * /travel-planning is the page the Charter routes visitors through before the inquiry, so it
  * carries real content rather than a shell and needs the same scan. It reuses ProcessSteps and
  * RecognitionList from the homepage, and adds a definition list the homepage does not have.

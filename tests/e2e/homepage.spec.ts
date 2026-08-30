@@ -12,7 +12,7 @@ test.describe("Homepage — narrative + conversions", () => {
     await page.goto("/");
     const hero = page.locator("section", { hasText: "Travel is part of living well." }).first();
     await expect(hero.getByRole("link", { name: "Begin Planning" })).toBeVisible();
-    await expect(hero.getByRole("link", { name: /Explore Reigate/ })).toBeVisible();
+    await expect(hero.getByRole("link", { name: /How planning works/i })).toBeVisible();
   });
 
   test("communicates offer status: Bespoke available, two in development", async ({ page }) => {

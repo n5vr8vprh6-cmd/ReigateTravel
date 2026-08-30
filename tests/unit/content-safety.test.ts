@@ -23,7 +23,12 @@ describe("content safety + approved language", () => {
     expect(site.brandIdea).toBe("Travel is part of living well.");
     expect(home.hero.heading).toBe("Travel is part of living well.");
     expect(home.hero.primaryCta.label).toBe("Begin Planning");
-    expect(home.hero.secondaryCta.label).toBe("Explore Reigate");
+    // Repointed, not removed. "Explore Reigate" was [A] in three governing sources and this
+    // guard is what made changing it a deliberate act rather than a typo. The new string is
+    // pinned for the same reason — the point of the guard is that hero copy cannot drift
+    // silently, not that it can never change. See source-conflicts.md #9.
+    expect(home.hero.secondaryCta.label).toBe("How Planning Works");
+    expect(home.hero.secondaryCta.href).toBe("/travel-planning");
   });
 
   it("never exposes the internal INPUT REQUIRED marker in homepage copy", () => {
