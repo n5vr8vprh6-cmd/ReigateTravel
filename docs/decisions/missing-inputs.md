@@ -4,6 +4,11 @@ Facts not yet supplied. Per content-safety rules these are **never invented** an
 `[INPUT REQUIRED: …]` marker is **never rendered in the public interface**. Each row lists the
 neutral fallback shipped in Milestone 1.
 
+**For the four the client can actually action, see [`docs/tyler-to-do.md`](../tyler-to-do.md)** —
+a plain-English checklist of the mailbox, the Calendly link, the Substack and the Luma event. This
+file stays the source of truth for what each gap does to the build; that one is the ask. Rows 4, 9,
+17, 18 and T2 are the ones it covers.
+
 | # | Missing input | Affects | Milestone 1 fallback (public-safe) | Blocks |
 |---|---------------|---------|-------------------------------------|--------|
 | 1 | ~~Approved Tyler headshot photography~~ **RESOLVED** (decision-log #73). Client supplied `tyler-portrait.jpg` and confirmed commercial clearance. | Founder feature (homepage §8) | Portrait now renders in place of the Olive typographic panel. **AI face remains prohibited** - if the photograph is withdrawn, revert to the panel rather than generating a substitute. | - |
