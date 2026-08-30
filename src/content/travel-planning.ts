@@ -55,6 +55,57 @@ export const travelPlanning = {
     },
   },
 
+  /**
+   * What the service actually does, as deliverables rather than philosophy. [D]
+   *
+   * An external review found this page explained the thinking well and the work barely at all —
+   * a visitor could finish it still unsure what Tyler would hand over. Every item below is
+   * traceable to something the site already claims, and nothing new is asserted:
+   *
+   * - the brief, the reasons and the shortlist → Method stages Define and Curate
+   * - arranging, and the details in one place → `helpsWith` above
+   * - reachable while you travel → Method stage Support, and `whyAdvisor` below
+   * - preferences carried forward → Method stage Remember
+   *
+   * Deliberately absent, and it must stay that way: named suppliers, properties, destinations,
+   * upgrades, amenities, response-time promises and anything resembling a service-level claim.
+   * None of those has been supplied, and Charter §18 bars inventing them.
+   */
+  handled: {
+    heading: "What Tyler takes off your plate.",
+    lead: "The work that would otherwise be yours, listed plainly.",
+    items: [
+      {
+        title: "The research",
+        body: "Understanding the brief well enough to make a small number of informed recommendations, rather than handing you a list to sort through yourself.",
+      },
+      {
+        title: "A written brief",
+        body: "Purpose, pace, priorities and investment range, set down clearly before anything is arranged — so what follows is measured against something.",
+      },
+      {
+        title: "Recommendations with reasons",
+        body: "Every choice comes with why it is being made. A recommendation you cannot interrogate is just an opinion.",
+      },
+      {
+        title: "The arranging",
+        body: "What has been agreed gets arranged and confirmed, so you are not assembling a chain of confirmation emails from unrelated suppliers.",
+      },
+      {
+        title: "The details, in one place",
+        body: "Documentation and preparation held together, rather than a folder of forwarded messages you are the one keeping track of.",
+      },
+      {
+        title: "Someone reachable while you travel",
+        body: "Help while plans are in motion, from the person who made them — not a queue that has never heard of your trip.",
+      },
+      {
+        title: "What you liked, kept",
+        body: "Your preferences carry forward, so a second journey starts further along than the first one did.",
+      },
+    ],
+  },
+
   whyAdvisor: {
     heading: "Why plan this way.",
     body: [

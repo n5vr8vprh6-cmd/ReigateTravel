@@ -1,25 +1,38 @@
 import type { InquiryStep } from "@/types/content";
 
 /**
- * The guided inquiry — Charter §10, six groups, in the Charter's own order.
+ * The guided inquiry — Charter §10's questions, split across two moments.
  *
  * Held as typed content rather than JSX so one definition drives three things: what the form
  * renders, what the server validates, and what the notification email iterates to build its
  * body. A field added here appears in all three without being retyped anywhere.
  *
+ * **Why this is now two registries.** It used to be one six-step, 25-field form asked before
+ * the visitor had spoken to anyone. Every question was a good one, but collectively they asked
+ * someone to complete most of a discovery call to earn a reply — administrative friction rather
+ * than qualifying friction. `inquirySteps` below is the hand-raise: enough to reply, enough to
+ * judge fit, and nothing else. `enrichmentSteps` carries the rest and is asked *after* a call is
+ * booked, when answering is obviously worth the visitor's time.
+ *
+ * Charter §10's groups are therefore preserved, not deleted — Purpose, Style and Context still
+ * exist, and still ask the same questions in the same words. Only the moment moved. Recorded in
+ * docs/decisions/source-conflicts.md #8, superseding decision #124.
+ *
  * Two content-safety rules bind this file:
  *
  * 1. **No investment ranges.** Charter §10 says ranges "should be finalized by Tyler before
- *    implementation" and they are still an open input (missing-inputs #3). The Investment step
- *    asks an open question instead. A unit test asserts this file carries no currency figure and
- *    no numeric range, so ranges cannot be added later without deliberately deleting that test.
+ *    implementation" and they are still an open input (missing-inputs #3). The investment
+ *    question is open text. A unit test asserts this file carries no currency figure and no
+ *    numeric range, so ranges cannot be added later without deliberately deleting that test.
  * 2. **No newsletter opt-in.** Charter §10 forbids auto-subscribing inquiry users and requires
  *    separate explicit consent — but the publication currently 404s (missing-inputs #9), so
  *    offering to subscribe someone would promise a destination that does not exist. When the
  *    publication is live, add an unchecked, separately-labelled opt-in here.
  *
- * Only four fields are required. This is a qualification instrument, not a gate: the minimum
- * needed to reply to someone is a name, an address to reply to, and consent to be replied to.
+ * Only three fields plus consent are required. That has not changed, and it was never the real
+ * problem: the form degrades to a single page without JavaScript, so anything reading it without
+ * running scripts — a crawler, a reader mode, an LLM summarising the site — saw all 25 fields at
+ * once and reasonably concluded it was enormous.
  */
 export const inquirySteps: readonly InquiryStep[] = [
   {
@@ -101,31 +114,71 @@ export const inquirySteps: readonly InquiryStep[] = [
         maxLength: 200,
         placeholder: "A month or a season is fine",
       },
-      {
-        name: "flexibility",
-        label: "How fixed are those dates?",
-        kind: "select",
-        options: [
-          { value: "fixed", label: "Fixed — they cannot move" },
-          { value: "some", label: "Some flexibility" },
-          { value: "flexible", label: "Very flexible" },
-          { value: "unsure", label: "Not sure yet" },
-        ],
-      },
       { name: "travellers", label: "How many travellers?", kind: "text", maxLength: 100 },
+    ],
+  },
+  {
+    id: "fit",
+    name: "Fit",
+    heading: "Whether this is a fit.",
+    lead: "Two last questions, then it is with Tyler.",
+    fields: [
       {
-        name: "relationships",
-        label: "Who is travelling together?",
-        kind: "text",
-        maxLength: 300,
-        help: "Partners, family, friends, or travelling solo.",
+        name: "mattersMost",
+        label: "What would make this trip successful?",
+        kind: "textarea",
+        maxLength: 2000,
+        help: "However you would judge it afterwards.",
       },
       {
-        name: "departure",
-        label: "Departing from",
+        name: "investment",
+        label: "What total trip investment are you comfortable considering?",
+        kind: "textarea",
+        maxLength: 1000,
+        help: "An approximate answer is fine. Please say whether that includes flights.",
+      },
+    ],
+  },
+];
+
+/**
+ * The pre-call enrichment questions — Charter §10's Purpose, Style, Timing and Context groups,
+ * asked after a conversation is booked rather than before one is offered.
+ *
+ * Nothing here is required beyond the two fields that let Tyler match the answers to an inquiry.
+ * The whole form is explicitly skippable: it exists to make a booked call better, not to gate it.
+ */
+export const enrichmentSteps: readonly InquiryStep[] = [
+  {
+    id: "identify",
+    name: "You",
+    heading: "So Tyler can match this to your inquiry.",
+    fields: [
+      {
+        name: "firstName",
+        label: "First name",
         kind: "text",
-        maxLength: 200,
-        autoComplete: "address-level2",
+        required: true,
+        autoComplete: "given-name",
+        maxLength: 80,
+        requiredMessage: "Please add your first name so this reaches the right inquiry.",
+      },
+      {
+        name: "lastName",
+        label: "Last name",
+        kind: "text",
+        autoComplete: "family-name",
+        maxLength: 80,
+      },
+      {
+        name: "email",
+        label: "Email address",
+        kind: "email",
+        required: true,
+        autoComplete: "email",
+        maxLength: 254,
+        help: "Use the same address you used on your inquiry.",
+        requiredMessage: "Please add the email address you used on your inquiry.",
       },
     ],
   },
@@ -144,12 +197,6 @@ export const inquirySteps: readonly InquiryStep[] = [
       {
         name: "feel",
         label: "How would you like the trip to feel?",
-        kind: "textarea",
-        maxLength: 2000,
-      },
-      {
-        name: "mattersMost",
-        label: "What matters most to you?",
         kind: "textarea",
         maxLength: 2000,
       },
@@ -217,17 +264,34 @@ export const inquirySteps: readonly InquiryStep[] = [
     ],
   },
   {
-    id: "investment",
-    name: "Investment",
-    heading: "What you are comfortable investing.",
-    lead: "An approximate answer is fine, and it stays between you and Tyler.",
+    id: "timing",
+    name: "Timing",
+    heading: "Dates and who is coming.",
     fields: [
       {
-        name: "investment",
-        label: "What total trip investment are you comfortable considering?",
-        kind: "textarea",
-        maxLength: 1000,
-        help: "Please say whether that includes flights.",
+        name: "flexibility",
+        label: "How fixed are those dates?",
+        kind: "select",
+        options: [
+          { value: "fixed", label: "Fixed — they cannot move" },
+          { value: "some", label: "Some flexibility" },
+          { value: "flexible", label: "Very flexible" },
+          { value: "unsure", label: "Not sure yet" },
+        ],
+      },
+      {
+        name: "relationships",
+        label: "Who is travelling together?",
+        kind: "text",
+        maxLength: 300,
+        help: "Partners, family, friends, or travelling solo.",
+      },
+      {
+        name: "departure",
+        label: "Departing from",
+        kind: "text",
+        maxLength: 200,
+        autoComplete: "address-level2",
       },
     ],
   },
@@ -273,6 +337,10 @@ export const inquiryFieldNames: readonly string[] = inquirySteps.flatMap((step) 
   step.fields.map((field) => field.name)
 );
 
+export const enrichmentFieldNames: readonly string[] = enrichmentSteps.flatMap((step) =>
+  step.fields.map((field) => field.name)
+);
+
 export const inquiryConsent = {
   name: "consent",
   /**
@@ -292,16 +360,23 @@ export const inquiryConsent = {
 export const inquiryCopy = {
   eyebrow: "Begin Planning",
   heading: "Tell us what you are considering.",
-  lead: "Your answers help Tyler understand what matters to you, and whether Reigate is the right planning partner. Six short steps, and nothing here is a commitment.",
+  lead: "Your answers help Tyler understand what matters to you, and whether Reigate is the right planning partner. Three short steps, and nothing here is a commitment.",
+  /**
+   * The honest version of "takes about 3 minutes". We have not measured how long a real person
+   * takes, and inventing a figure to reduce friction is the kind of small untruth this project
+   * does not trade in — so this states what is verifiable from the form itself: how many steps
+   * there are, how little is compulsory, and who reads the result. [D]
+   */
+  expectation: "Three steps · only three fields are required · Tyler reads every inquiry herself",
   submitLabel: "Send my inquiry",
   submittingLabel: "Sending…",
   continueLabel: "Continue",
   backLabel: "Back",
   errorSummaryHeading: "There is something to fix",
   /**
-   * The standing index beside the form. It exists so a 25-field inquiry shows its whole shape
-   * up front rather than revealing it a step at a time — someone who can see there are six
-   * short groups is far likelier to finish than someone who cannot tell how much is left. [D]
+   * The standing index beside the form. It exists so the inquiry shows its whole shape up front
+   * rather than revealing it a step at a time — someone who can see there are three short groups
+   * is far likelier to finish than someone who cannot tell how much is left. [D]
    */
   stepIndexHeading: "What we will ask",
   /** Marks the current step for screen readers; weight alone would be style-only meaning. */
@@ -318,4 +393,24 @@ export const inquiryCopy = {
     "That came through faster than this form usually takes. Please check your answers and send again.",
   rateLimited:
     "That is a few inquiries from this connection in a short time. Please wait a few minutes and try again.",
+} as const;
+
+export const enrichmentCopy = {
+  eyebrow: "Before your call",
+  heading: "Help Tyler prepare.",
+  lead: "Entirely optional, and there are no wrong answers. Anything you add here is time you will not spend covering ground on the call itself.",
+  expectation: "Optional · skip any question · answer as much or as little as you like",
+  submitLabel: "Send to Tyler",
+  submittingLabel: "Sending…",
+  continueLabel: "Continue",
+  backLabel: "Back",
+  errorSummaryHeading: "There is something to fix",
+  stepIndexHeading: "What we will ask",
+  currentStepSuffix: " (current step)",
+  deliveryFailed:
+    "We could not deliver this just now. Nothing is lost — your answers are still here.",
+  tooFast:
+    "That came through faster than this form usually takes. Please check your answers and send again.",
+  rateLimited:
+    "That is a few submissions from this connection in a short time. Please wait a few minutes and try again.",
 } as const;

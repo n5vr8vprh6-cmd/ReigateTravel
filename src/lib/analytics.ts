@@ -57,6 +57,21 @@ export const analyticsEvents = {
   inquirySubmitted: "inquiry_submitted",
   /** A submission did not go through, and why. The most useful signal on the page. */
   inquiryBlocked: "inquiry_blocked",
+  /**
+   * A Begin Planning control was pressed. `location` is our own label for where on the site it
+   * sits — never a URL, which could carry a query string somebody pasted.
+   */
+  ctaClicked: "cta_clicked",
+  /**
+   * The confirmation page rendered. This is the first event that means a *delivered* inquiry:
+   * `inquiry_submitted` only means Send was pressed, and the server can still reject it. Until
+   * this existed, success was measurable only as a page view on a noindexed route.
+   */
+  inquiryReceived: "inquiry_received",
+  /** Calendly reported a booking. The last rung, and the one the whole funnel exists for. */
+  callBooked: "call_booked",
+  /** An outbound click to the Luma community calendar. */
+  communityClicked: "community_clicked",
 } as const;
 
 /** Vercel's payloads take flat scalars only. Deliberately narrow: no objects, no free text. */
@@ -105,4 +120,38 @@ export function inquiryBlockedPayload(reason: string): EventPayload {
 /** Which step the visitor got to before pressing Send — the abandonment signal, inverted. */
 export function inquirySubmittedPayload(stepCount: number): EventPayload {
   return { steps: stepCount };
+}
+
+/**
+ * Where a CTA sits, as our own vocabulary rather than a URL. A pathname would eventually carry
+ * a query string someone pasted into the address bar, and that is exactly the kind of free text
+ * decision #133 keeps out of the payload.
+ */
+export type CtaLocation =
+  | "hero"
+  | "header"
+  | "mobile-nav"
+  | "final-cta"
+  | "travel-planning"
+  | "travel-notes"
+  | "method"
+  | "faq"
+  | "about"
+  | "contact";
+
+export function ctaClickedPayload(location: CtaLocation): EventPayload {
+  return { location };
+}
+
+/** No payload worth carrying: the event is the fact that it happened. */
+export function inquiryReceivedPayload(): EventPayload {
+  return {};
+}
+
+export function callBookedPayload(): EventPayload {
+  return {};
+}
+
+export function communityClickedPayload(location: CtaLocation): EventPayload {
+  return { location };
 }

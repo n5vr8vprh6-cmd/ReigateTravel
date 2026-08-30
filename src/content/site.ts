@@ -1,3 +1,5 @@
+import type { CtaLink } from "@/types/content";
+
 /**
  * Single typed source of truth for factual business information and external
  * integration destinations. Components must read destinations from here — never
@@ -51,6 +53,28 @@ export const site: SiteConfig = {
     instagram: "https://www.instagram.com/reigatetravel.co/",
     linkedin: "https://ca.linkedin.com/in/tyler-reigate-13b3aa2b2",
   },
+};
+
+/**
+ * Where "Join the Community" goes, for every call site on the site.
+ *
+ * This exists because the same label meant three different things: Luma on the homepage
+ * community band, the newsletter band (`#join`) in the final CTA, and a jump back to the
+ * homepage from /community and /curated-journeys — the last of which sent a visitor
+ * *away* from the page they were reading about community.
+ *
+ * The newsletter anchor is deliberately NOT the fallback. Travel Notes is the content
+ * relationship and the Reigate community is the events relationship; collapsing the two is
+ * what made the CTA incoherent in the first place. With Luma unconfirmed this points at the
+ * Community page, which always exists and always tells the truth.
+ */
+export const communityCta: CtaLink = {
+  label: "Join the Community",
+  href: site.social.luma ?? "/community",
+  external: Boolean(site.social.luma),
+  // Announced here rather than at each call site, so no consumer can render the outbound
+  // version without telling a screen-reader user where it goes and that it opens a new tab.
+  accessibleLabel: site.social.luma ? "Join the Community on Luma (opens in a new tab)" : undefined,
 };
 
 /** Approved credentials — use these exact strings. Do not expand "WTA" or add numbers/logos. */

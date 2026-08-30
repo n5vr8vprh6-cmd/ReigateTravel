@@ -44,9 +44,18 @@ export default function BeginPlanningPage() {
       />
 
       {emailConfigured ? (
-        <div className="mt-12">
-          <InquiryForm />
-        </div>
+        <>
+          {/* States what is verifiable from the form itself — how many steps, how little is
+              compulsory, and who reads the result. Deliberately not "takes about N minutes":
+              nobody has measured that, and inventing a figure to reduce friction is a small
+              untruth this project does not trade in. */}
+          <p className="text-eyebrow text-olive mt-6 max-w-[38rem] tracking-[0.14em] uppercase">
+            {inquiryCopy.expectation}
+          </p>
+          <div className="mt-12">
+            <InquiryForm />
+          </div>
+        </>
       ) : (
         <div className="mt-8">
           <p className="text-body text-ink/85 max-w-[38rem]">

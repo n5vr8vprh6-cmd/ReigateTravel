@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildNotification, buildAcknowledgement, escapeHtml } from "@/lib/email/templates";
+import {
+  buildNotification,
+  buildAcknowledgement,
+  buildEnrichment,
+  escapeHtml,
+} from "@/lib/email/templates";
 import { site } from "@/content/site";
 
 const answers = {
@@ -7,7 +12,7 @@ const answers = {
   lastName: "Okonkwo",
   email: "ada@example.com",
   considering: "Two weeks somewhere warm",
-  flexibility: "some",
+  preferredContact: "either",
   investment: "Around what a good trip costs, flights included",
 };
 
@@ -27,8 +32,10 @@ describe("notification email", () => {
   });
 
   it("renders the human label for a chosen option, not the stored value", () => {
-    expect(mail.html).toContain("Some flexibility");
-    expect(mail.text).toContain("Some flexibility");
+    expect(mail.html).toContain("Either is fine");
+    expect(mail.text).toContain("Either is fine");
+    // The stored value must not be what Tyler reads.
+    expect(mail.text).not.toMatch(/^\s*either\s*$/m);
   });
 
   it("omits fields left blank rather than printing empty rows", () => {
@@ -36,10 +43,56 @@ describe("notification email", () => {
     expect(mail.text).not.toContain("Departing from");
   });
 
-  it("groups answers under their Charter step names", () => {
+  it("groups answers under their step names", () => {
     expect(mail.text).toContain("CONTACT");
     expect(mail.text).toContain("JOURNEY");
-    expect(mail.text).toContain("INVESTMENT");
+    expect(mail.text).toContain("FIT");
+  });
+});
+
+/**
+ * The enrichment notification carries the questions that moved out of the inquiry. It is a
+ * separate template rather than a second call to `buildNotification` because it arrives after
+ * an inquiry Tyler has already read, and threading it under "New travel inquiry" would make a
+ * follow-up look like a second lead.
+ */
+describe("enrichment email", () => {
+  const notes = {
+    firstName: "Ada",
+    lastName: "Okonkwo",
+    email: "ada@example.com",
+    flexibility: "some",
+    pace: "slow",
+    prompting: "A milestone birthday",
+    departure: "",
+  };
+  const mail = buildEnrichment(notes);
+
+  it("is distinguishable from a new inquiry at a glance", () => {
+    expect(mail.subject).toContain("Ada Okonkwo");
+    expect(mail.subject).not.toContain("New travel inquiry");
+  });
+
+  it("carries the address so it can be matched to the original inquiry by hand", () => {
+    // Nothing on this site stores a submission (missing-inputs #10), so there is no id to
+    // join on and the address is the only thing tying these notes to an inquiry.
+    expect(mail.text).toContain("ada@example.com");
+  });
+
+  it("renders the moved questions, with human option labels", () => {
+    expect(mail.text).toContain("Some flexibility");
+    expect(mail.text).toContain("Slow — fewer places, more time in each");
+    expect(mail.text).toContain("A milestone birthday");
+  });
+
+  it("omits blanks and never renders an inquiry-only field", () => {
+    expect(mail.text).not.toContain("Departing from");
+    expect(mail.text).not.toContain("What are you considering?");
+  });
+
+  it("escapes a hostile answer", () => {
+    const hostile = { ...notes, prompting: "</dd></dl><script>alert(1)</script>" };
+    expect(buildEnrichment(hostile).html).not.toContain("<script>");
   });
 });
 

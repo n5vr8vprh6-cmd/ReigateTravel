@@ -11,6 +11,7 @@ export default function NotFound() {
   return (
     <Section surface="ivory" width="prose" aria-labelledby="notfound-heading">
       <SectionIntro
+        as="h1"
         eyebrow="404"
         heading="This page has wandered off."
         headingId="notfound-heading"

@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { inquirySteps } from "@/content/inquiry";
 
 /**
  * /begin-planning renders one of exactly two states, decided at build time by whether the
@@ -25,9 +26,17 @@ async function formIsPresent(page: Page): Promise<boolean> {
 function stepLabel(page: Page) {
   return page
     .locator("form p")
-    .filter({ hasText: /^Step \d of 6/ })
+    .filter({ hasText: /^Step \d of \d/ })
     .first();
 }
+
+/**
+ * "Step 2 of 3", built from the registry rather than written out. These were literals reading
+ * "of 6", and splitting the inquiry into a short brief plus a pre-call form meant finding and
+ * editing nine of them by hand. Derived, they describe whatever the form actually is.
+ */
+const TOTAL = inquirySteps.length;
+const stepText = (n: number) => `Step ${n} of ${TOTAL}`;
 
 test.describe("Begin Planning", () => {
   test("renders exactly one of the form or the mailto fallback", async ({ page }) => {
@@ -67,8 +76,8 @@ test.describe("Begin Planning", () => {
       test.skip(!(await formIsPresent(page)), "built without delivery env vars; form not rendered");
     });
 
-    test("starts on step 1 of 6 and shows the step in text, not by colour", async ({ page }) => {
-      await expect(stepLabel(page)).toContainText("Step 1 of 6");
+    test("starts on the first step and shows the step in text, not by colour", async ({ page }) => {
+      await expect(stepLabel(page)).toContainText(stepText(1));
     });
 
     test("carries a labelled honeypot that is hidden from sighted users", async ({ page }) => {
@@ -94,7 +103,7 @@ test.describe("Begin Planning", () => {
       await expect(page.getByRole("link", { name: /Please add your first name/ })).toBeVisible();
       await expect(page.locator("#f-firstName-error")).toBeVisible();
       // Still on step 1 — the step did not advance.
-      await expect(stepLabel(page)).toContainText("Step 1 of 6");
+      await expect(stepLabel(page)).toContainText(stepText(1));
     });
 
     test("associates an error with its field for screen readers", async ({ page }) => {
@@ -110,10 +119,10 @@ test.describe("Begin Planning", () => {
       await page.fill("#f-lastName", "Okonkwo");
       await page.fill("#f-email", "ada@example.com");
       await page.getByRole("button", { name: "Continue" }).click();
-      await expect(stepLabel(page)).toContainText("Step 2 of 6");
+      await expect(stepLabel(page)).toContainText(stepText(2));
 
       await page.getByRole("button", { name: "Back" }).click();
-      await expect(stepLabel(page)).toContainText("Step 1 of 6");
+      await expect(stepLabel(page)).toContainText(stepText(1));
       await expect(page.locator("#f-firstName")).toHaveValue("Ada");
     });
 
@@ -130,7 +139,7 @@ test.describe("Begin Planning", () => {
       await page.fill("#f-lastName", "Okonkwo");
       await page.fill("#f-email", "ada@example.com");
       await page.locator("#f-firstName").press("Enter");
-      await expect(stepLabel(page)).toContainText("Step 2 of 6");
+      await expect(stepLabel(page)).toContainText(stepText(2));
     });
 
     test("is operable by keyboard alone", async ({ page }) => {
@@ -193,7 +202,7 @@ test.describe("Begin Planning", () => {
       await page.fill("#f-lastName", "Lovelace");
       await page.fill("#f-email", "ada@example.com");
       await page.getByRole("button", { name: "Continue" }).click();
-      await expect(stepLabel(page)).toContainText("Step 2 of 6");
+      await expect(stepLabel(page)).toContainText(stepText(2));
       // The transition runs for --duration-slow; poll rather than race it.
       await expect
         .poll(async () => (await readMark())!.left, {
@@ -259,7 +268,7 @@ test.describe("Begin Planning", () => {
     await page.fill("#f-lastName", "Lovelace");
     await page.fill("#f-email", "ada@example.com");
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(stepLabel(page)).toContainText("Step 2 of 6");
+    await expect(stepLabel(page)).toContainText(stepText(2));
     // No transition to wait out: it should already be there.
     expect(await markLeft()).toBeGreaterThan(before);
     await ctx.close();

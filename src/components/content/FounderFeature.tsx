@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
-import { credentials } from "@/content/site";
 import { home } from "@/content/home";
 
 /**
@@ -45,18 +44,10 @@ export function FounderFeature() {
             {paragraph}
           </p>
         ))}
-        <p className="text-body text-olive mt-6 font-semibold">
-          {credentials.map((credential, index) => (
-            <span key={credential}>
-              {credential}
-              {index < credentials.length - 1 ? (
-                <span aria-hidden="true" className="text-taupe px-2">
-                  ·
-                </span>
-              ) : null}
-            </span>
-          ))}
-        </p>
+        {/* The credentials used to repeat here. They now sit directly under the hero, where
+            they are the first third-party proof a visitor meets rather than the third — and
+            printing them twice on one page made them read as filler rather than as licences.
+            They still appear on /about and in the FAQ, which are separate pages. */}
         <div className="mt-8">
           <Button href={cta.href} variant="secondary">
             {cta.label}

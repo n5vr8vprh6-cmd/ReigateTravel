@@ -1,4 +1,5 @@
-import { inquirySteps } from "@/content/inquiry";
+import { inquirySteps, enrichmentSteps } from "@/content/inquiry";
+import type { InquiryStep } from "@/types/content";
 import { site } from "@/content/site";
 
 export interface EmailContent {
@@ -22,8 +23,11 @@ export function escapeHtml(value: string): string {
 }
 
 /** Answered fields only, in Charter order, grouped by step. Blank answers are omitted. */
-function answeredByStep(values: Record<string, string>) {
-  return inquirySteps
+function answeredByStep(
+  values: Record<string, string>,
+  steps: readonly InquiryStep[] = inquirySteps
+) {
+  return steps
     .map((step) => ({
       name: step.name,
       answers: step.fields
@@ -117,5 +121,53 @@ export function buildAcknowledgement(values: Record<string, string>): EmailConte
     subject: `We have your inquiry — ${site.name}`,
     html,
     text: lines.join("\n"),
+  };
+}
+
+/**
+ * The pre-call enrichment notification.
+ *
+ * A separate subject line on purpose: this arrives after an inquiry Tyler has already read, and
+ * threading it under "New travel inquiry" would make a follow-up look like a second lead. The
+ * name and email are carried so it can be matched to the original by hand — nothing on this
+ * site stores a submission, so there is no id to join on (missing-inputs #10).
+ */
+export function buildEnrichment(values: Record<string, string>): EmailContent {
+  const name = displayName(values);
+  const groups = answeredByStep(values, enrichmentSteps);
+
+  const text = [
+    `Pre-call notes from ${name}`,
+    `Matches the inquiry from: ${values.email ?? ""}`,
+    "",
+    ...groups.flatMap((group) => [
+      group.name.toUpperCase(),
+      ...group.answers.map((a) => `  ${a.label}\n    ${a.value}`),
+      "",
+    ]),
+  ].join("\n");
+
+  const html = [
+    `<h1 style="font-family:Georgia,serif;font-weight:500;">Pre-call notes from ${escapeHtml(name)}</h1>`,
+    `<p style="font-family:system-ui,sans-serif;">Matches the inquiry from: <a href="mailto:${escapeHtml(values.email ?? "")}">${escapeHtml(values.email ?? "")}</a></p>`,
+    ...groups.map(
+      (group) =>
+        `<h2 style="font-family:system-ui,sans-serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#404639;">${escapeHtml(group.name)}</h2>` +
+        `<dl style="font-family:system-ui,sans-serif;">` +
+        group.answers
+          .map(
+            (a) =>
+              `<dt style="color:#404639;font-size:13px;">${escapeHtml(a.label)}</dt>` +
+              `<dd style="margin:0 0 12px;color:#1b1b1b;white-space:pre-wrap;">${escapeHtml(a.value)}</dd>`
+          )
+          .join("") +
+        `</dl>`
+    ),
+  ].join("\n");
+
+  return {
+    subject: `Pre-call notes — ${name}`,
+    html,
+    text,
   };
 }

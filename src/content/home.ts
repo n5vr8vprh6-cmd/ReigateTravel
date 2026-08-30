@@ -1,4 +1,4 @@
-import { site } from "@/content/site";
+import { site, communityCta, credentials } from "@/content/site";
 
 /**
  * Homepage content — the 11 approved Fable storyboard sections.
@@ -22,6 +22,25 @@ export const home = {
       src: "/images/hero-coast.png",
       alt: "A woman sits alone on a stone wall overlooking a calm coastline in soft light.",
     },
+  },
+
+  /**
+   * The category line and the credentials, sitting directly under the hero. [D]
+   *
+   * The hero is approved copy and stays exactly as it is: "Travel is part of living well." is
+   * the brand idea and "Lifestyle Wellness Travel" is the category, both [A]. Neither says what
+   * a visitor can actually hire, and an external review found that the business Reigate is in
+   * was not obvious within the first screen. This adds the missing sentence rather than editing
+   * an approved one.
+   *
+   * The credentials moved up from the founder section for the same reason — they are the only
+   * third-party proof the site has while there are no testimonials, and they were doing that
+   * work two-thirds of the way down the page.
+   */
+  positioning: {
+    statement:
+      "Personal travel planning with Tyler Reigate — thoughtfully designed journeys shaped around your pace, your priorities, and the people you are travelling with.",
+    credentials,
   },
 
   explanation: {
@@ -96,11 +115,7 @@ export const home = {
     // Luma is the confirmed destination for community gatherings (verified 200, 2026-07-28).
     // Read from site.social.luma rather than hardcoded — a single edit disables it if that
     // ever changes, and `external` marks it as leaving the site for screen-reader users.
-    primaryCta: {
-      label: "Join the Community",
-      href: site.social.luma ?? "#join",
-      external: Boolean(site.social.luma),
-    },
+    primaryCta: communityCta,
     secondaryLink: { label: "About Community Experiences", href: "/community" },
     // Scroll-scrubbed like the Reigate story section: the water moves and the sailboat
     // drifts right-to-left toward the copy panel. Frames generated from `oakville-horizon.png`,
@@ -164,7 +179,7 @@ export const home = {
     heading: "Begin with how you want the journey to feel.", // [A]
     body: "Tell us what you're considering, or simply stay connected — both are welcome.", // [D]
     primaryCta: { label: "Begin Planning", href: "/begin-planning" },
-    secondaryCta: { label: "Join the Community", href: "#join" },
+    secondaryCta: communityCta,
     endline: site.endline, // "Experiences That Stay With You." [A] — single small appearance
   },
 } as const;

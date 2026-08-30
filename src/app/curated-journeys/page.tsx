@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ShellPage } from "@/components/layout/ShellPage";
+import { communityCta } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Curated Wellness Journeys",
@@ -16,7 +17,7 @@ export default function CuratedJourneysPage() {
       body={[
         "This offer is in development. When a journey with real details is ready, you'll hear about it first through the community — no dates, destinations, or prices are promised before they exist.",
       ]}
-      primaryCta={{ label: "Join the Community", href: "/#join" }}
+      primaryCta={communityCta}
     />
   );
 }

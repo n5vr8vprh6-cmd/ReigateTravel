@@ -21,6 +21,14 @@
 > silently breaks the dev server's CSS and JS chunks (they 400). A stale `next start` process left
 > running across a rebuild fails the same way. Both produced misleading verification results during
 > this work — restart the server after any build, and prefer letting Playwright manage its own.
+>
+> **Worse than "misleading results" (seen 2026-08-29):** with `npm run dev` still running, a
+> rebuild left `.next` in a state where Playwright's own `next start` could not boot at all —
+> `Cannot find module './611.js'`, then `Timed out waiting 120000ms from config.webServer`. **No
+> test ran.** And because the command was piped (`npx playwright test | tail`), the shell reported
+> the exit code of `tail`, which is always 0. A suite that never started looked like a suite that
+> passed. Two rules follow: stop the dev server before building, and never read a test run's
+> success from a piped exit code — capture `$?` from the runner itself.
 
 ### Unit tests (Vitest)
 - `StatusLabel` — renders "Available now" / "In development" as visible text (not colour-only).

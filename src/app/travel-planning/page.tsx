@@ -6,6 +6,7 @@ import { ProcessSteps } from "@/components/content/ProcessSteps";
 import { EditorialImage } from "@/components/ui/EditorialImage";
 import { CTAPanel } from "@/components/ui/CTAPanel";
 import { TextLink } from "@/components/ui/TextLink";
+import { TrackedCTA } from "@/components/analytics/TrackedCTA";
 import { travelPlanning as tp } from "@/content/travel-planning";
 
 export const metadata: Metadata = {
@@ -39,6 +40,15 @@ export default function TravelPlanningPage() {
             lead={tp.lead}
             size="statement"
           />
+          {/* The page's own CTA, in the hero rather than only at the bottom. This is the page
+              Charter Journey A routes travel-ready visitors through, and it previously asked
+              them to read all nine sections before offering the action they arrived for. The
+              homepage's two-CTA discipline is a homepage rule — this page exists to convert. */}
+          <div className="mt-9">
+            <TrackedCTA location="travel-planning" href="/begin-planning" variant="primary">
+              Begin Planning
+            </TrackedCTA>
+          </div>
         </div>
       </Section>
 
@@ -73,10 +83,35 @@ export default function TravelPlanningPage() {
         </div>
       </Section>
 
+      {/* The concrete counterpart to the section above it: that one says how Reigate thinks,
+          this one says what actually gets done. Sand so it separates from the philosophy. */}
+      <Section surface="sand" aria-labelledby="tp-handled">
+        <div className="max-w-[44rem]">
+          <SectionIntro
+            heading={tp.handled.heading}
+            headingId="tp-handled"
+            lead={tp.handled.lead}
+          />
+        </div>
+        <dl className="reveal-stagger mt-10 grid gap-x-12 gap-y-8 md:grid-cols-2">
+          {tp.handled.items.map((item) => (
+            <div key={item.title}>
+              <dt className="text-body-lg text-ink font-semibold">{item.title}</dt>
+              <dd className="text-body text-ink/85 mt-2">{item.body}</dd>
+            </div>
+          ))}
+        </dl>
+        <div className="mt-12">
+          <TrackedCTA location="method" href="/begin-planning" variant="primary">
+            Begin Planning
+          </TrackedCTA>
+        </div>
+      </Section>
+
       {/* Bleeds into the right gutter, the opposite direction to the image above it. Three
           text-only bands were about to run consecutively here, which is precisely the flatness
           the design audit identified: alternating Ivory and Sand is not on its own a rhythm. */}
-      <Section surface="sand" aria-labelledby="tp-why">
+      <Section surface="ivory" aria-labelledby="tp-why">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div className="reveal max-w-[34rem]">
             <SectionIntro heading={tp.whyAdvisor.heading} headingId="tp-why" />
@@ -98,7 +133,7 @@ export default function TravelPlanningPage() {
 
       {/* The Method, reused rather than restated. It is the same five approved stages the
           homepage shows; a second wording of them would be a second thing to keep in sync. */}
-      <Section surface="ivory" aria-labelledby="tp-method">
+      <Section surface="sand" aria-labelledby="tp-method">
         <div className="max-w-[44rem]">
           <SectionIntro
             eyebrow={tp.method.eyebrow}
@@ -110,7 +145,7 @@ export default function TravelPlanningPage() {
         <ProcessSteps />
       </Section>
 
-      <Section surface="sand" aria-labelledby="tp-scope">
+      <Section surface="ivory" aria-labelledby="tp-scope">
         <div className="reveal max-w-[40rem]">
           <SectionIntro heading={tp.scope.heading} headingId="tp-scope" />
           {tp.scope.body.map((paragraph) => (
@@ -124,7 +159,7 @@ export default function TravelPlanningPage() {
         </div>
       </Section>
 
-      <Section surface="ivory" aria-labelledby="tp-investment">
+      <Section surface="sand" aria-labelledby="tp-investment">
         <div className="reveal max-w-[40rem]">
           <SectionIntro heading={tp.investment.heading} headingId="tp-investment" />
           {tp.investment.body.map((paragraph) => (
@@ -135,7 +170,7 @@ export default function TravelPlanningPage() {
         </div>
       </Section>
 
-      <Section surface="sand" size="sm" aria-labelledby="tp-questions">
+      <Section surface="ivory" size="sm" aria-labelledby="tp-questions">
         <div className="max-w-[44rem]">
           <SectionIntro heading={tp.questions.heading} headingId="tp-questions" size="sm" />
           <dl className="reveal-stagger mt-8">

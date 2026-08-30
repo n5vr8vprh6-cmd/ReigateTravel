@@ -1,4 +1,5 @@
 import { test, expect, type Browser } from "@playwright/test";
+import { inquirySteps } from "@/content/inquiry";
 
 /**
  * Rendering with JavaScript disabled.
@@ -46,8 +47,13 @@ test("the guided inquiry is usable without JavaScript", async ({ browser }) => {
 
   // Unenhanced means every step is visible at once and there is a single submit button —
   // one long form that works, rather than a stepper with dead controls.
-  await expect(page.locator("form section")).toHaveCount(6);
-  for (let i = 0; i < 6; i++) {
+  //
+  // Counted from the registry rather than written as a literal. The literal was `6`, and when
+  // the inquiry was split into a short brief plus a pre-call form this assertion was one of the
+  // things that had to be found and edited by hand. Deriving it means the shape of the form can
+  // change without this test making a false claim about it.
+  await expect(page.locator("form section")).toHaveCount(inquirySteps.length);
+  for (let i = 0; i < inquirySteps.length; i++) {
     await expect(page.locator("form section").nth(i)).toBeVisible();
   }
   await expect(page.locator("#f-firstName")).toBeVisible();
