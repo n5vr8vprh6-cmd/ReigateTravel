@@ -1,4 +1,5 @@
-import { inquirySteps, inquiryConsent } from "@/content/inquiry";
+import { inquirySteps, enrichmentSteps, inquiryConsent } from "@/content/inquiry";
+import type { InquiryStep } from "@/types/content";
 import type { InquiryField } from "@/types/content";
 
 export type FieldErrors = Record<string, string>;
@@ -18,7 +19,8 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** At least a few digits, allowing the punctuation people actually type. */
 const TEL = /^[+()\-.\s\d]{6,}$/;
 
-const allFields: readonly InquiryField[] = inquirySteps.flatMap((step) => step.fields);
+const fieldsOf = (steps: readonly InquiryStep[]): readonly InquiryField[] =>
+  steps.flatMap((step) => step.fields);
 
 function validateField(field: InquiryField, raw: string | undefined): string | null {
   const value = (raw ?? "").trim();
@@ -56,28 +58,48 @@ function validateField(field: InquiryField, raw: string | undefined): string | n
 }
 
 /**
- * Server-side validation. The client validates too, but only for the sake of the person
- * filling the form in — this is the copy that decides whether an email is sent.
+ * Server-side validation against a given step registry. The client validates too, but only for
+ * the sake of the person filling the form in — this is the copy that decides whether an email
+ * is sent.
+ *
+ * Parameterised by registry so the pre-call enrichment form cannot drift into a second set of
+ * rules. One validator, two forms; the only difference between them is whether consent applies,
+ * and enrichment does not take consent because the inquiry it follows already did.
  */
-export function validateInquiry(values: Record<string, string>): ValidationResult {
+export function validateAgainst(
+  steps: readonly InquiryStep[],
+  values: Record<string, string>,
+  { requireConsent }: { requireConsent: boolean }
+): ValidationResult {
   const fieldErrors: FieldErrors = {};
 
-  for (const field of allFields) {
+  for (const field of fieldsOf(steps)) {
     const error = validateField(field, values[field.name]);
     if (error) fieldErrors[field.name] = error;
   }
 
   // Consent is not in the step registry: it is a condition of submitting, not a question.
-  if (values[inquiryConsent.name] !== "on") {
+  if (requireConsent && values[inquiryConsent.name] !== "on") {
     fieldErrors[inquiryConsent.name] = inquiryConsent.requiredMessage;
   }
 
   return { ok: Object.keys(fieldErrors).length === 0, fieldErrors };
 }
 
+export function validateInquiry(values: Record<string, string>): ValidationResult {
+  return validateAgainst(inquirySteps, values, { requireConsent: true });
+}
+
+export function validateEnrichment(values: Record<string, string>): ValidationResult {
+  return validateAgainst(enrichmentSteps, values, { requireConsent: false });
+}
+
 /** The step a given field lives in, so a failed submit can jump the visitor to it. */
-export function stepIndexOfField(name: string): number {
-  const index = inquirySteps.findIndex((step) => step.fields.some((f) => f.name === name));
+export function stepIndexOfField(
+  name: string,
+  steps: readonly InquiryStep[] = inquirySteps
+): number {
+  const index = steps.findIndex((step) => step.fields.some((f) => f.name === name));
   // Consent renders on the final step alongside the submit button.
-  return index === -1 ? inquirySteps.length - 1 : index;
+  return index === -1 ? steps.length - 1 : index;
 }

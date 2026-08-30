@@ -18,6 +18,12 @@ interface ButtonLinkProps {
   accessibleLabel?: string;
   external?: boolean;
   className?: string;
+  /**
+   * Fired on activation, for the CTAs that are measured. The navigation is the anchor's own —
+   * this never preventDefaults, so a thrown handler or a blocked analytics script cannot stop
+   * a visitor getting where they are going.
+   */
+  onClick?: () => void;
 }
 
 /**
@@ -32,6 +38,7 @@ export function Button({
   accessibleLabel,
   external = false,
   className,
+  onClick,
 }: ButtonLinkProps) {
   const classes = cn(
     buttonBase,
@@ -46,13 +53,14 @@ export function Button({
         rel="noopener noreferrer"
         aria-label={accessibleLabel}
         className={classes}
+        onClick={onClick}
       >
         {children}
       </a>
     );
   }
   return (
-    <Link href={href} aria-label={accessibleLabel} className={classes}>
+    <Link href={href} aria-label={accessibleLabel} className={classes} onClick={onClick}>
       {children}
     </Link>
   );

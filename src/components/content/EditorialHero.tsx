@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
+import { TrackedCTA } from "@/components/analytics/TrackedCTA";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { home } from "@/content/home";
 
@@ -89,9 +90,15 @@ export function EditorialHero() {
           </div>
           <div className="hero-layer" data-depth="4">
             <div className="mt-9 flex flex-col gap-4 sm:flex-row">
-              <Button href={primaryCta.href} variant="primary" inverse className="w-full sm:w-auto">
+              <TrackedCTA
+                href={primaryCta.href}
+                location="hero"
+                variant="primary"
+                inverse
+                className="w-full sm:w-auto"
+              >
                 {primaryCta.label}
-              </Button>
+              </TrackedCTA>
               <Button
                 href={secondaryCta.href}
                 variant="secondary"

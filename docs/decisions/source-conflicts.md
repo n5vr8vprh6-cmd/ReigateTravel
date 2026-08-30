@@ -117,6 +117,80 @@ The approved Brand Book, Charter, and Fable storyboard files are **never edited*
   enforced at the edge before the function runs. That is strictly better than a shared store for
   this shape of problem, which is why no code was written for it now.
 
+## 8 — Inquiry length: Charter §10's six groups vs. a short qualification brief
+
+- **Conflict.** Charter §10 specifies the guided inquiry's question set and groups it into Contact,
+  Journey, Purpose, Style, Investment and Context, and decision #124 explicitly rejected a shorter
+  rebuild ("25 fields across 25 screens is more clicking, not better, and the six groups are
+  Charter §10's own grouping"). An external funnel review argued the opposite: that asking all of
+  it before any personal contact makes a visitor complete most of a discovery call to earn a reply.
+- **Resolution (2026-08-29).** The review is right about the *moment*, not about the *questions*.
+  The inquiry is now three groups — Contact, Journey, Fit — and every remaining Charter question
+  moved verbatim to a pre-call enrichment form at `/begin-planning/prepare`, offered after the
+  booking step. Nothing was deleted, reworded, or made harder to answer; the deep discovery is
+  asked of someone who has already decided to talk, when answering is obviously worth their time.
+- **Why this is not a §10 breach.** §10 governs what the inquiry process asks and what it does with
+  the answers. Both are unchanged: the same questions reach Tyler, by the same Resend path, under
+  the same consent, and are never simulated. What changed is which side of the hand-raise each
+  group sits on. `tests/forms/content-safety.test.ts` asserts the union of the two registries still
+  contains every field name the six-group form carried, so this cannot decay into a real deletion.
+- **What this supersedes.** Decision #124. Its reasoning about one-field-per-screen still stands
+  and was not adopted — this is fewer groups, not more screens.
+- **To reverse:** move the `enrichmentSteps` groups back into `inquirySteps` and delete
+  `/begin-planning/prepare`. The field literals are unchanged, so it is a move, not a rewrite.
+
+## 9 — Hero secondary CTA: "Explore Reigate" vs. "How Planning Works"
+
+- **Conflict.** The external review recommends changing the hero's secondary CTA from "Explore
+  Reigate" to "How Planning Works", on the grounds that the first is vague and the second is a
+  low-commitment commercial next step. That is a reasonable read. But "Explore Reigate" is `[A]`
+  approved copy in the Gate-4 storyboard, is named as a hero CTA in Brand Book ch. 36, and appears
+  in Charter §9 — conflict #2 above was resolved by keeping it as the *secondary* action precisely
+  because all three sources carry it.
+- **Status: RAISED, NOT RESOLVED.** No change made. A string that three governing sources name is
+  not something to edit on a fourth party's recommendation without the client saying so. Conflict
+  #5 is the precedent for how this goes if they do: client direction governs their own site, the
+  concern is stated plainly first, and the decision is recorded.
+- **If approved,** the change is `home.hero.secondaryCta` in `src/content/home.ts` and the
+  `accessibleLabel` in `EditorialHero.tsx`. Consider pointing it at `/travel-planning` rather than
+  the `#what-is-reigate` anchor, since that page is what "how planning works" actually means.
+
+## 10 — Community in the primary navigation: Charter §8 vs. commercial hierarchy
+
+- **Conflict.** Charter §8's sitemap lists Community alongside Travel Planning, Travel Notes and
+  About in the primary navigation. Charter §2 separately requires that the site "must not present
+  planned offers as though they are already operating", and §9 that future services must not be
+  given "equal visual prominence to the current revenue-generating service". In the header those
+  two clauses contradict each other: four equally-weighted links, one of which is the only thing
+  anyone can buy and one of which is an offer in development.
+- **Resolution (2026-08-29).** The prominence clause governs over the sitemap clause, on the same
+  reasoning as conflict #4 — intent over mechanism. Community moves to the footer Explore column
+  beside Curated Wellness Journeys, the other in-development offer. It remains in the sitemap, in
+  the footer, and linked from the homepage's own community band with its Luma CTA; nothing is
+  hidden and no route was removed.
+- **To reverse:** move the entry from `footerNav` back to `primaryNav` in
+  `src/content/navigation.ts`. `tests/unit/navigation.test.ts` asserts every nav href reaches the
+  sitemap either way.
+
+## 11 — A second third-party embed: Calendly vs. the single-embed rule
+
+- **Conflict.** `.claude/rules/frontend.md` states "Minimal third-party JS (the only embed is the
+  Substack signup, lazy-loaded)". The booking step on the confirmation page is a second embed.
+  Charter §22 also excludes a "duplicate event-registration system" from Version 1 — though that
+  clause is about rebuilding Luma, not about scheduling a sales call.
+- **Resolution (2026-08-29).** Adopted, bounded. The gap between "inquiry sent" and "call booked"
+  was the largest leak in the funnel, and closing it with an outbound link rather than an embed
+  costs a page load at the exact moment intent is highest. The bounds: one noindexed page, no npm
+  dependency (a script tag, as with Vercel Web Analytics per #131), nothing rendered at all unless
+  `NEXT_PUBLIC_CALENDLY_URL` is set to an `https://calendly.com` URL, and a plain link to the same
+  calendar always present so booking never depends on the script loading.
+- **Also relevant.** Charter §10 permits a scheduling link "only after the intended sales process
+  is confirmed", and §24 still lists the consultation method as an outstanding input. The env gate
+  is the mechanism for that: with the URL unset the page renders exactly what it did before, so the
+  code can ship ahead of the business decision without asserting one has been made.
+- **To reverse:** unset the env var. To remove entirely, delete `src/lib/scheduling.ts`,
+  `SchedulingEmbed.tsx` and the booking branch in `begin-planning/received/page.tsx`.
+
 ## Non-conflicts noted
 
 - No conflict between the Brand Book, Charter, and storyboard on offer status, palette, typography,

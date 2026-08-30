@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { validateInquiry, stepIndexOfField } from "@/lib/validation/inquiry";
+import { validateInquiry, validateEnrichment, stepIndexOfField } from "@/lib/validation/inquiry";
 import { parseInquiry } from "@/lib/forms/parse";
-import { inquirySteps, inquiryConsent, inquiryFieldNames } from "@/content/inquiry";
+import {
+  inquirySteps,
+  enrichmentSteps,
+  inquiryConsent,
+  inquiryFieldNames,
+} from "@/content/inquiry";
 
 /** The four fields that actually gate a submission. */
 const valid = {
@@ -61,16 +66,36 @@ describe("inquiry validation", () => {
   });
 
   it("rejects a select or radio value that is not on the list", () => {
-    expect(validateInquiry({ ...valid, flexibility: "whenever" }).ok).toBe(false);
-    expect(validateInquiry({ ...valid, flexibility: "some" }).ok).toBe(true);
     expect(validateInquiry({ ...valid, preferredContact: "carrier-pigeon" }).ok).toBe(false);
+    expect(validateInquiry({ ...valid, preferredContact: "either" }).ok).toBe(true);
   });
 
   it("maps a field back to the step it lives in", () => {
     expect(stepIndexOfField("firstName")).toBe(0);
-    expect(stepIndexOfField("investment")).toBe(4);
+    expect(stepIndexOfField("investment")).toBe(inquirySteps.length - 1);
     // Consent is not a step field; it renders with the submit button on the last step.
     expect(stepIndexOfField(inquiryConsent.name)).toBe(inquirySteps.length - 1);
+  });
+
+  /**
+   * The enrichment form runs the same validator against its own registry. Checked here because
+   * the failure mode if it ever stops doing so is silent: a second, divergent set of rules that
+   * nobody notices until a submission is rejected for a reason the form never displayed.
+   */
+  it("validates the enrichment form against its own registry, without consent", () => {
+    const notes = { firstName: "Ada", email: "ada@example.com" };
+    expect(validateEnrichment(notes).ok).toBe(true);
+
+    // The inquiry would reject this same payload for want of consent.
+    expect(validateInquiry({ ...notes, lastName: "Okonkwo" }).ok).toBe(false);
+
+    expect(validateEnrichment({ ...notes, email: "" }).ok).toBe(false);
+    expect(validateEnrichment({ ...notes, pace: "sprinting" }).ok).toBe(false);
+    expect(validateEnrichment({ ...notes, pace: "slow" }).ok).toBe(true);
+    // A field that belongs to the inquiry only is not validated here.
+    expect(validateEnrichment({ ...notes, considering: "x".repeat(9000) }).ok).toBe(true);
+
+    expect(stepIndexOfField("pace", enrichmentSteps)).toBe(2);
   });
 });
 

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -9,10 +9,40 @@ import {
   inquirySubmittedPayload,
 } from "@/lib/analytics";
 
-const formSource = readFileSync(
-  path.join(process.cwd(), "src/components/forms/InquiryForm.tsx"),
-  "utf8"
-);
+/**
+ * Every file that fires an event, discovered rather than listed.
+ *
+ * This used to read one hardcoded path, `InquiryForm.tsx`. That was correct while the form was
+ * the only instrumented thing on the site; it silently stopped being correct the moment the
+ * booking embed, the confirmation beacon and the CTA wrapper started firing events too — a
+ * hardcoded path cannot fail when the code it was guarding moves somewhere else. Walking the
+ * tree means a new call site is covered the moment it is written, without anyone remembering.
+ */
+function sourcesThatTrack(): { file: string; source: string }[] {
+  const root = path.join(process.cwd(), "src");
+  const found: { file: string; source: string }[] = [];
+
+  function walk(dir: string) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+        continue;
+      }
+      if (!/[.]tsx?$/.test(entry.name)) continue;
+      // The module that defines trackEvent is not a call site.
+      if (full.endsWith(path.join("lib", "analytics.ts"))) continue;
+      const source = readFileSync(full, "utf8");
+      if (source.includes("trackEvent(")) found.push({ file: full, source });
+    }
+  }
+
+  walk(root);
+  return found;
+}
+
+const trackingSources = sourcesThatTrack();
+const formSource = trackingSources.map((f) => f.source).join("\n");
 
 /**
  * The consent copy tells the visitor their answers are emailed to Tyler and "not stored on this
@@ -90,12 +120,24 @@ describe("analytics", () => {
     });
   });
 
-  it("the form only ever sends one of the three approved payloads", () => {
-    // Every trackEvent call in the form, with its arguments.
-    const calls = [...formSource.matchAll(/trackEvent\(([\s\S]*?)\);/g)].map((m) => m[1]);
+  it("every event anywhere on the site uses an approved payload builder", () => {
+    expect(trackingSources.length, "the funnel should be instrumented").toBeGreaterThan(0);
+
+    // Every trackEvent call across every file that makes one, with its arguments.
+    const calls = trackingSources.flatMap(({ source }) =>
+      [...source.matchAll(/trackEvent\(([\s\S]*?)\);/g)].map((m) => m[1]!)
+    );
     expect(calls.length, "the funnel should be instrumented").toBeGreaterThan(0);
 
-    const approved = ["inquiryStepPayload", "inquiryBlockedPayload", "inquirySubmittedPayload"];
+    const approved = [
+      "inquiryStepPayload",
+      "inquiryBlockedPayload",
+      "inquirySubmittedPayload",
+      "ctaClickedPayload",
+      "inquiryReceivedPayload",
+      "callBookedPayload",
+      "communityClickedPayload",
+    ];
     for (const call of calls) {
       expect(
         approved.some((builder) => call.includes(builder)),

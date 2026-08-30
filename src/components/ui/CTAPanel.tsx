@@ -1,6 +1,8 @@
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/Button";
+import { TrackedCTA } from "@/components/analytics/TrackedCTA";
 import { HorizonRule } from "@/components/ui/HorizonRule";
+import type { CtaLocation } from "@/lib/analytics";
 import type { CtaLink } from "@/types/content";
 
 interface CTAPanelProps {
@@ -12,6 +14,12 @@ interface CTAPanelProps {
   endline?: string;
   /** Rendered on the Olive band, so use inverse button styling. */
   inverse?: boolean;
+  /**
+   * Report clicks from this panel, labelled with where it sits. Omitted, the panel renders
+   * plain server-rendered buttons — measurement is opt-in, so no page pays for a client
+   * component it did not ask for.
+   */
+  trackAs?: CtaLocation;
 }
 
 /**
@@ -32,6 +40,7 @@ export function CTAPanel({
   secondary,
   endline,
   inverse = false,
+  trackAs,
 }: CTAPanelProps) {
   return (
     <div className="mx-auto max-w-[48rem] text-center">
@@ -59,27 +68,58 @@ export function CTAPanel({
       ) : null}
       <div className="cta-layer" data-depth="4">
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button
-            href={primary.href}
-            variant="primary"
-            inverse={inverse}
-            external={primary.external}
-            accessibleLabel={primary.accessibleLabel}
-            className="w-full sm:w-auto"
-          >
-            {primary.label}
-          </Button>
-          {secondary ? (
-            <Button
-              href={secondary.href}
-              variant="secondary"
+          {trackAs ? (
+            <TrackedCTA
+              href={primary.href}
+              location={trackAs}
+              variant="primary"
               inverse={inverse}
-              external={secondary.external}
-              accessibleLabel={secondary.accessibleLabel}
+              external={primary.external}
+              accessibleLabel={primary.accessibleLabel}
               className="w-full sm:w-auto"
             >
-              {secondary.label}
+              {primary.label}
+            </TrackedCTA>
+          ) : (
+            <Button
+              href={primary.href}
+              variant="primary"
+              inverse={inverse}
+              external={primary.external}
+              accessibleLabel={primary.accessibleLabel}
+              className="w-full sm:w-auto"
+            >
+              {primary.label}
             </Button>
+          )}
+          {secondary ? (
+            trackAs ? (
+              // The secondary action on the closing panel is the community link, which is a
+              // different intent from planning and reports to its own series.
+              <TrackedCTA
+                href={secondary.href}
+                location={trackAs}
+                event="community"
+                variant="secondary"
+                inverse={inverse}
+                external={secondary.external}
+                accessibleLabel={secondary.accessibleLabel}
+                className="w-full sm:w-auto"
+              >
+                {secondary.label}
+              </TrackedCTA>
+            ) : (
+              <Button
+                href={secondary.href}
+                variant="secondary"
+                inverse={inverse}
+                external={secondary.external}
+                accessibleLabel={secondary.accessibleLabel}
+                className="w-full sm:w-auto"
+              >
+                {secondary.label}
+              </Button>
+            )
           ) : null}
         </div>
       </div>

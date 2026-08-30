@@ -1,6 +1,7 @@
 import { Section } from "@/components/layout/Section";
 import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
+import { TrackedCTA } from "@/components/analytics/TrackedCTA";
 import { TextLink } from "@/components/ui/TextLink";
 import { EditorialImage } from "@/components/ui/EditorialImage";
 import { CTAPanel } from "@/components/ui/CTAPanel";
@@ -35,8 +36,35 @@ export default function HomePage() {
       {/* 1 — Hero */}
       <EditorialHero />
 
-      {/* 2 — Clear explanation. `lg` so the page opens with more air than it carries mid-scroll. */}
+      {/* 2 — Clear explanation. `lg` so the page opens with more air than it carries mid-scroll.
+
+          Opens with the positioning line and the credentials. Not a new band: the storyboard's
+          eleven sections are approved and adding a twelfth to carry two lines of text would
+          spend a section on something that belongs at the top of this one. It also keeps the
+          page inside its height ceiling, which has about half a screen of room left. */}
       <Section surface="ivory" size="lg" id="what-is-reigate" aria-labelledby="explanation-heading">
+        <div className="reveal border-taupe/40 mb-10 border-b pb-7 lg:mb-14 lg:pb-10">
+          <p className="text-body-lg text-ink max-w-[46rem]">{home.positioning.statement}</p>
+          {/* Verbatim. AGENTS.md fixes these three strings exactly: no expansion of "WTA", no
+              numbers, no certification logos.
+
+              Sentence case, not the uppercase eyebrow treatment. `FounderFeature` set them this
+              way on purpose — uppercase removes the ascender and descender shapes people read
+              words by, and these are three unfamiliar proper nouns a visitor is being asked to
+              actually read rather than a label they can skim. Moving them up should not have
+              quietly changed that. */}
+          {/* Spacing separates them, not rules. A drawn separator between items cannot survive
+              wrapping: at 390px the list breaks after the first credential and the rule that
+              belonged *between* two items ends up hanging at the start of the second line,
+              reading as a bullet nobody intended. Seen in the 390px screenshot. A wide gap
+              does the same job at every width and has nothing to leave behind. */}
+          <ul className="text-body text-olive mt-6 flex flex-wrap gap-x-8 gap-y-1 font-semibold">
+            {home.positioning.credentials.map((credential) => (
+              <li key={credential}>{credential}</li>
+            ))}
+          </ul>
+        </div>
+
         <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
           <div className="reveal max-w-[34rem]">
             <SectionIntro heading={home.explanation.heading} headingId="explanation-heading" />
@@ -198,16 +226,16 @@ export default function HomePage() {
               </p>
             ))}
             <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center">
-              <Button
+              <TrackedCTA
                 href={home.community.primaryCta.href}
+                location="hero"
+                event="community"
                 variant="primary"
                 external={home.community.primaryCta.external}
-                accessibleLabel={
-                  home.community.primaryCta.external ? "Join the Community on Luma" : undefined
-                }
+                accessibleLabel={home.community.primaryCta.accessibleLabel}
               >
                 {home.community.primaryCta.label}
-              </Button>
+              </TrackedCTA>
               <TextLink href={home.community.secondaryLink.href}>
                 {home.community.secondaryLink.label}
               </TextLink>
@@ -293,6 +321,7 @@ export default function HomePage() {
           body={home.finalCta.body}
           primary={home.finalCta.primaryCta}
           secondary={home.finalCta.secondaryCta}
+          trackAs="final-cta"
           endline={home.finalCta.endline}
           inverse
         />

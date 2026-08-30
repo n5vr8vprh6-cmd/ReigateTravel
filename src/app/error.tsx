@@ -19,6 +19,7 @@ export default function Error({
   return (
     <Section surface="ivory" width="prose" aria-labelledby="error-heading">
       <SectionIntro
+        as="h1"
         eyebrow="Something went wrong"
         heading="We hit an unexpected problem."
         headingId="error-heading"

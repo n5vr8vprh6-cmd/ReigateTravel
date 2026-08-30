@@ -1,20 +1,68 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { inquirySteps, inquiryConsent, inquiryCopy } from "@/content/inquiry";
+import { inquirySteps, enrichmentSteps, inquiryConsent, inquiryCopy } from "@/content/inquiry";
 
 const source = readFileSync(path.join(process.cwd(), "src/content/inquiry.ts"), "utf8");
 
 describe("inquiry content safety", () => {
-  it("has the six Charter groups, in the Charter's order", () => {
-    expect(inquirySteps.map((s) => s.name)).toEqual([
-      "Contact",
-      "Journey",
+  /**
+   * The inquiry is the hand-raise: enough to reply, enough to judge fit, nothing else.
+   * Charter §10's remaining groups were not deleted — they moved to the pre-call enrichment
+   * form, which the next assertion pins. Both halves are checked because the whole defence of
+   * shortening the inquiry is that no question was actually lost.
+   */
+  it("asks only the qualifying groups up front", () => {
+    expect(inquirySteps.map((s) => s.name)).toEqual(["Contact", "Journey", "Fit"]);
+  });
+
+  it("still asks the Charter's deeper groups, after the call is booked", () => {
+    expect(enrichmentSteps.map((s) => s.name)).toEqual([
+      "You",
       "Purpose",
       "Style",
-      "Investment",
+      "Timing",
       "Context",
     ]);
+  });
+
+  it("keeps every question the six-group inquiry asked", () => {
+    const asked = new Set([
+      ...inquirySteps.flatMap((s) => s.fields).map((f) => f.name),
+      ...enrichmentSteps.flatMap((s) => s.fields).map((f) => f.name),
+    ]);
+    // The exact field set the inquiry carried before it was split. If a question is ever
+    // dropped rather than moved, this is where that shows up.
+    for (const name of [
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "preferredContact",
+      "considering",
+      "destination",
+      "dates",
+      "flexibility",
+      "travellers",
+      "relationships",
+      "departure",
+      "prompting",
+      "feel",
+      "mattersMost",
+      "helpWith",
+      "pastFrustration",
+      "pace",
+      "balance",
+      "accommodation",
+      "supportLevel",
+      "accessibilityNeeds",
+      "investment",
+      "workedWithAdvisor",
+      "heardAbout",
+      "anythingElse",
+    ]) {
+      expect(asked, `${name} should still be asked somewhere`).toContain(name);
+    }
   });
 
   it("gives every field a visible label and a unique name", () => {
@@ -39,10 +87,10 @@ describe("inquiry content safety", () => {
    * deliberately deleting this test.
    */
   it("states no investment range and no price", () => {
-    const investment = inquirySteps.find((s) => s.name === "Investment")!;
-    expect(investment.fields).toHaveLength(1);
-    expect(investment.fields[0]!.kind).toBe("textarea");
-    expect(investment.fields[0]!.options).toBeUndefined();
+    const investment = inquirySteps.flatMap((s) => s.fields).find((f) => f.name === "investment")!;
+    expect(investment.kind).toBe("textarea");
+    // A select would mean ranges, and ranges are Tyler's to set (missing-inputs #3).
+    expect(investment.options).toBeUndefined();
 
     expect(source).not.toMatch(/[$£€]\s?\d/);
     expect(source).not.toMatch(/\d[\d,]*\s*[–—-]\s*\d/);
@@ -54,7 +102,9 @@ describe("inquiry content safety", () => {
    * (missing-inputs #9), so there is no honest opt-in to offer yet.
    */
   it("offers no newsletter opt-in", () => {
-    const names = inquirySteps.flatMap((s) => s.fields).map((f) => f.name.toLowerCase());
+    const names = [...inquirySteps, ...enrichmentSteps]
+      .flatMap((s) => s.fields)
+      .map((f) => f.name.toLowerCase());
     for (const name of names) {
       expect(name).not.toContain("newsletter");
       expect(name).not.toContain("subscribe");
