@@ -141,19 +141,30 @@ The approved Brand Book, Charter, and Fable storyboard files are **never edited*
 
 ## 9 — Hero secondary CTA: "Explore Reigate" vs. "How Planning Works"
 
-- **Conflict.** The external review recommends changing the hero's secondary CTA from "Explore
+- **Conflict.** An external review recommended changing the hero's secondary CTA from "Explore
   Reigate" to "How Planning Works", on the grounds that the first is vague and the second is a
-  low-commitment commercial next step. That is a reasonable read. But "Explore Reigate" is `[A]`
-  approved copy in the Gate-4 storyboard, is named as a hero CTA in Brand Book ch. 36, and appears
-  in Charter §9 — conflict #2 above was resolved by keeping it as the *secondary* action precisely
-  because all three sources carry it.
-- **Status: RAISED, NOT RESOLVED.** No change made. A string that three governing sources name is
-  not something to edit on a fourth party's recommendation without the client saying so. Conflict
-  #5 is the precedent for how this goes if they do: client direction governs their own site, the
-  concern is stated plainly first, and the decision is recorded.
-- **If approved,** the change is `home.hero.secondaryCta` in `src/content/home.ts` and the
-  `accessibleLabel` in `EditorialHero.tsx`. Consider pointing it at `/travel-planning` rather than
-  the `#what-is-reigate` anchor, since that page is what "how planning works" actually means.
+  low-commitment commercial next step. But "Explore Reigate" is `[A]` approved copy in the Gate-4
+  storyboard, is named as a hero CTA in Brand Book ch. 36, and appears in Charter §9 — conflict #2
+  above was resolved by keeping it as the *secondary* action precisely because all three sources
+  carry it.
+- **Raised first, then resolved by client direction (2026-08-30).** The concern was put to the
+  client explicitly, including that three governing sources name the string and that a unit test
+  pins it as locked hero language. The client directed the change. Conflict #5 is the precedent:
+  client direction governs their own site, the concern is stated plainly beforehand, and the
+  decision is recorded rather than absorbed.
+- **What shipped.** `home.hero.secondaryCta` is now
+  `{ label: "How Planning Works", href: "/travel-planning" }`. The destination moved too: the old
+  CTA pointed at `#what-is-reigate`, an on-page explainer, and "how planning works" is a promise
+  the service page actually keeps. `EditorialHero.tsx`'s `accessibleLabel` follows it.
+- **The guard was repointed, not deleted.** `tests/unit/content-safety.test.ts` pinned the exact
+  string, which is what made this a deliberate act rather than a typo. It now pins the new label
+  *and* the new href. The point of that test is that hero copy cannot drift silently — not that it
+  can never change — so removing it would have been the wrong resolution.
+- **What is unchanged.** The hero H1, eyebrow and body are all `[A]` and were not touched. Charter
+  §9's ordering — Begin Planning primary, this one secondary — is unchanged, so conflict #2 still
+  holds as resolved.
+- **To reverse:** restore the label and `href: "#what-is-reigate"` in `src/content/home.ts`, the
+  `accessibleLabel`, and the two test expectations.
 
 ## 10 — Community in the primary navigation: Charter §8 vs. commercial hierarchy
 
@@ -190,6 +201,33 @@ The approved Brand Book, Charter, and Fable storyboard files are **never edited*
   code can ship ahead of the business decision without asserting one has been made.
 - **To reverse:** unset the env var. To remove entirely, delete `src/lib/scheduling.ts`,
   `SchedulingEmbed.tsx` and the booking branch in `begin-planning/received/page.tsx`.
+
+## 12 — "What you will not find here": Charter §2 as public copy vs. commercial read
+
+- **Conflict.** Decision #98 published Charter §2's "will not rely on" list as public copy on
+  /about — four items stating that the site carries no manufactured urgency, no testimonials, no
+  health-outcome claims and no partnerships beyond the named credentials. An external review read
+  it as commercially defensive: "You don't need to explain why you aren't doing bad marketing."
+- **Resolved by client direction (2026-08-30).** The section is removed entirely. The client was
+  asked and chose removal over trimming.
+- **The concern, stated plainly, because it is not only a copy change.** Three unit tests used that
+  section as *positive evidence* rather than merely tolerating it: `about-content.test.ts` asserted
+  the page contained "not therapy", "when there are real ones to publish" and "manufactured
+  urgency". Those existed because decision #100 records negative-space tests false-positiving three
+  times, at which point the disclaimer sentences became the thing the assertions could anchor on.
+  All three positive assertions are now gone.
+- **What still holds.** The bans themselves are untouched and are the real guard: no health,
+  transformation or outcome claim; no testimonial, partnership, award or affiliation; no urgency or
+  scarcity phrasing. Charter §18 is unaffected — nothing may be invented, and nothing was. What
+  changed is that the page no longer *says* why those things are absent. Absence now reads as
+  absence, which is true but says less than the disclosure did.
+- **The urgency test kept its phrase-shaped patterns** even though the sentence that forced them
+  ("countdowns, limited spots") is gone. The lesson generalises: a ban must target the claim, not
+  the vocabulary, and the next disclaimer written on this page would hit the same trap.
+- **To reverse:** restore `about.restraint` in `src/content/about.ts`, its `Section` in
+  `src/app/about/page.tsx` (Ivory, between Principles and the CTA), and the three assertions.
+  Note the band rhythm currently reads Ivory → Sand → Ivory → Sand → Olive without it, and
+  reinstating an Ivory band between Sand and Olive keeps that intact.
 
 ## Non-conflicts noted
 

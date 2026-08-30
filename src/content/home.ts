@@ -17,7 +17,12 @@ export const home = {
     heading: site.brandIdea, // "Travel is part of living well." [A]
     body: "Reigate creates thoughtful journeys, personalized travel experiences, and welcoming community events for people who want to explore with greater intention.", // [A]
     primaryCta: { label: "Begin Planning", href: "/begin-planning" },
-    secondaryCta: { label: "Explore Reigate", href: "#what-is-reigate" },
+    // Was "Explore Reigate" → #what-is-reigate, which is [A] copy in the Gate-4 storyboard and
+    // named in both Brand Book ch. 36 and Charter §9. Changed at client direction after an
+    // external review called it vague: it asked the visitor to explore a brand rather than
+    // offering a next step, and it pointed at an on-page explainer rather than the service.
+    // The concern was raised before the change, not after. See source-conflicts.md #9.
+    secondaryCta: { label: "How Planning Works", href: "/travel-planning" },
     image: {
       src: "/images/hero-coast.png",
       alt: "A woman sits alone on a stone wall overlooking a calm coastline in soft light.",

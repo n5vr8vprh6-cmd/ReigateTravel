@@ -92,6 +92,8 @@ export const accessibility = {
     { label: "This page", path: "/accessibility" },
     { label: "Begin Planning", path: "/begin-planning" },
     { label: "Inquiry confirmation", path: "/begin-planning/received" },
+    { label: "Pre-call notes", path: "/begin-planning/prepare" },
+    { label: "Pre-call notes confirmation", path: "/begin-planning/prepare/received" },
   ],
 
   feedback: {

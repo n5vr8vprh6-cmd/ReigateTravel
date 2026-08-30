@@ -103,7 +103,7 @@ export function EditorialHero() {
                 href={secondaryCta.href}
                 variant="secondary"
                 inverse
-                accessibleLabel="Explore Reigate — learn what Reigate is"
+                accessibleLabel="How planning works — about Bespoke Travel Planning"
                 className="w-full sm:w-auto"
               >
                 {secondaryCta.label}

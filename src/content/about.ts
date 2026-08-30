@@ -93,17 +93,6 @@ export const about = {
     ],
   },
 
-  restraint: {
-    heading: "What you will not find here.",
-    lead: "Some of these are absent because they are not true yet. Saying so seems better than filling the space.",
-    items: [
-      "Countdowns, limited spots, or any other manufactured urgency.",
-      "Testimonials or client stories. There will be some when there are real ones to publish.",
-      "Claims about health outcomes or personal transformation. This is travel planning, not therapy.",
-      "Partnerships, awards or affiliations beyond the credentials listed below.",
-    ],
-  },
-
   cta: {
     heading: "The best way to know is to describe the trip.",
     body: "Six short steps, and nothing here is a commitment.",

@@ -44,6 +44,7 @@ const ROUTES = [
   "/faq",
   "/contact",
   "/begin-planning",
+  "/begin-planning/prepare",
   "/privacy",
   "/terms",
   "/accessibility",

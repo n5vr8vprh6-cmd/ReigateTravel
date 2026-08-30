@@ -77,8 +77,15 @@ export default function AccessibilityPage() {
             {paragraph}
           </p>
         ))}
+        {/* Subject prefilled. A barrier report arrives in the same inbox as travel inquiries
+            and partnership mail, and one that announces itself is likelier to be routed and
+            answered than one titled "(no subject)". Costs the reporter nothing — it is still a
+            plain mailto they can edit. */}
         <p className="text-body mt-6">
-          <TextLink href={`mailto:${site.inquiryEmail}`} external>
+          <TextLink
+            href={`mailto:${site.inquiryEmail}?subject=${encodeURIComponent("Accessibility barrier")}`}
+            external
+          >
             Email {site.inquiryEmail}
           </TextLink>
         </p>
