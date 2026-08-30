@@ -31,6 +31,20 @@ let every section become the same beige.
 `SectionIntro`, `OfferCard`, `ProcessSteps`, `FounderFeature`, `ArticleCard`, `NewsletterSignup`.
 Compose pages from these — don't build oversized one-off page components.
 
+## Ink tints — the measured floor
+
+Two audits in a row reached for a tint that fails contrast, so the numbers live here now. Measured
+Ink `#1B1B1B` over the surfaces it is used on:
+
+| Tint     | On Ivory | On Sand | Use for                                                                                                           |
+| -------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| `ink/55` | 3.73     | 3.39    | **Non-text only.** Clears SC 1.4.11's 3:1 for a control boundary; fails for text. This is the input-border value. |
+| `ink/60` | 4.36     | 3.89    | **Nothing.** Looks safe and is not — it fails 1.4.3 on both surfaces.                                             |
+| `ink/70` | 5.99     | 5.14    | The lightest tint safe for body text anywhere on the site.                                                        |
+
+The two floors are not interchangeable: 3:1 governs a control's boundary, 4.5:1 governs the words.
+Reaching for the border value to make text quieter is the specific mistake both times.
+
 ## Avoid (project anti-patterns)
 
 generic luxury-agency styling · beige template sections · excessive/rounded card grids · heavy
