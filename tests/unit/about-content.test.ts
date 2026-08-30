@@ -10,8 +10,14 @@ const allCopy = JSON.stringify(about).toLowerCase();
 
 /**
  * /about is the page §18 protects most directly: it forbids inventing personal claims about
- * Tyler, and Tyler is the subject. The biography beyond the two approved paragraphs is
- * missing-inputs #8, so these tests exist to keep the gap a gap rather than let it fill in.
+ * Tyler, and Tyler is the subject.
+ *
+ * These tests were originally written to keep a gap a gap: the biography beyond the two
+ * approved paragraphs was missing-inputs #8, and the risk was that someone would fill the
+ * silence with plausible invention. The client has since supplied "Meet Tyler", so the gap is
+ * closed and the risk has moved rather than disappeared — the danger now is that approved
+ * words get tidied, shortened or blended into the derived copy around them. The bans below
+ * still apply to every word on the page, including hers.
  */
 describe("about content safety", () => {
   it("reuses the approved Tyler paragraphs verbatim rather than paraphrasing them", () => {
@@ -96,6 +102,24 @@ describe("about content safety", () => {
     }
     // And the refusal must be stated, not merely implied by absence.
     expect(allCopy).toContain("manufactured urgency");
+  });
+
+  it("carries Tyler's supplied biography, and carries it whole", () => {
+    // Six paragraphs as supplied. A shorter array means someone trimmed her words, which is
+    // the specific failure this guards: §18's protection is about her voice, not just about
+    // avoiding invented facts.
+    expect(about.meetTyler.body).toHaveLength(6);
+    for (const paragraph of about.meetTyler.body) {
+      expect(paragraph.length, "no paragraph may be reduced to a fragment").toBeGreaterThan(120);
+    }
+    // The founding sentence and the closing idea are the two most quotable lines in the
+    // document and the likeliest to be "improved". Pinned verbatim.
+    expect(about.meetTyler.body[0]).toContain(
+      "a lifestyle and wellness travel company created for people who want more from travel than simply getting away"
+    );
+    expect(about.meetTyler.body[5]).toContain(
+      "travel should leave you feeling more connected, more inspired, and a little more yourself than when you left"
+    );
   });
 
   it("routes to the guided inquiry", () => {

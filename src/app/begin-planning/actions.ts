@@ -66,7 +66,7 @@ export async function submitInquiry(
     subject: notification.subject,
     html: notification.html,
     text: notification.text,
-    // So Tyler replies from his own inbox straight to the visitor, per Charter §13.
+    // So Tyler replies from her own inbox straight to the visitor, per Charter §13.
     replyTo: values.email,
     idempotencyKey: idempotencyKey(values),
   });

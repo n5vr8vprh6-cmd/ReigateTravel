@@ -42,15 +42,24 @@ test.describe("analytics is off until it is switched on", () => {
     expect(traces.insightScripts).toBe(0);
   });
 
-  test("the privacy page describes the build it is actually part of", async ({ page }) => {
-    // The measurement paragraph is driven by the same flag as the script. With the flag off the
-    // page must say so - a privacy page describing analytics that are not running is as wrong
-    // as one silent about analytics that are.
+  test("the published privacy policy is the real one, not the shell", async ({ page }) => {
+    // This assertion used to check a measurement paragraph driven by the analytics flag, so the
+    // page could not describe tracking the build was not doing. The client-supplied policy has
+    // since replaced that, and it is fixed legal text rather than something that follows a flag.
+    // What is asserted now is that the real document is published and intact.
+    //
+    // The known inconsistency is deliberate and recorded: §12 says the site introduces no
+    // website analytics without a policy update, and analytics is on. Tyler adds that sentence
+    // to the source document; it is not edited here.
     await page.goto("/privacy");
     const body = await page.locator("main").innerText();
-    expect(body).toContain("does not measure how you use it");
-    expect(body).not.toContain("records anonymous, aggregate usage");
-    // ...and the substance of the inquiry consent is stated here too, not only on the form.
-    expect(body).toContain("not stored on this website");
+    expect(body, "the shell must be gone").not.toContain("Content pending legal review");
+    // Case-insensitive: the effective date is styled uppercase, and innerText returns the
+    // transformed text. Asserting the cased string couples this to a styling choice.
+    expect(body.toLowerCase()).toContain("effective august 29, 2026");
+    expect(body).toContain("1. Information We Collect");
+    expect(body).toContain("14. Contact Us");
+    // §8 is the clause the inquiry form's consent checkbox leans on.
+    expect(body).toContain("not intentionally stored in a separate database");
   });
 });

@@ -58,7 +58,21 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section surface="sand" aria-labelledby="about-story">
+      {/* Tyler's own words, in her own section, ahead of everything derived. Placed before
+          "Why Reigate exists" deliberately: that section is [D] copy reasoning about the
+          business, and this is the founder actually speaking. The approved voice leads. */}
+      <Section surface="sand" aria-labelledby="about-meet-tyler">
+        <div className="reveal max-w-[40rem]">
+          <SectionIntro heading={about.meetTyler.heading} headingId="about-meet-tyler" />
+          {about.meetTyler.body.map((paragraph) => (
+            <p key={paragraph} className="text-body text-ink/85 mt-4">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </Section>
+
+      <Section surface="ivory" aria-labelledby="about-story">
         <div className="reveal max-w-[40rem]">
           <SectionIntro heading={about.story.heading} headingId="about-story" />
           {about.story.body.map((paragraph) => (
@@ -69,7 +83,7 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section surface="ivory" aria-labelledby="about-principles">
+      <Section surface="sand" aria-labelledby="about-principles">
         <div className="max-w-[44rem]">
           <SectionIntro
             heading={about.principles.heading}
@@ -97,7 +111,7 @@ export default function AboutPage() {
       {/* Charter §2's "it will not rely on" list, published as a public commitment. It is the
           brand's own stated position, and it explains the absence of proof a visitor might
           otherwise expect to find on a page like this. */}
-      <Section surface="sand" aria-labelledby="about-restraint">
+      <Section surface="ivory" aria-labelledby="about-restraint">
         <div className="max-w-[44rem]">
           <SectionIntro
             heading={about.restraint.heading}

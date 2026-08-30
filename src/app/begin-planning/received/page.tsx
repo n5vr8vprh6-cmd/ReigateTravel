@@ -26,7 +26,7 @@ export default function InquiryReceivedPage() {
         heading="Your inquiry is with Tyler."
         headingId="received-heading"
         size="statement"
-        lead={`He reads every inquiry personally and typically replies within ${site.inquiryResponseTime}.`}
+        lead={`She reads every inquiry personally and typically replies within ${site.inquiryResponseTime}.`}
       />
 
       <div className="mt-10 max-w-[38rem]">

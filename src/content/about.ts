@@ -42,6 +42,26 @@ export const about = {
     alt: "Tyler, founder of Reigate Travel & Co.",
   },
 
+  /**
+   * Tyler's own words, from the client-supplied "Meet Tyler" document. **Verbatim, and that is
+   * the point.** §18 bars inventing personal claims about her, and for the whole of Milestone 1
+   * this page had to route around that: four of the Charter's eight content items for /about
+   * were left unwritten because they needed her voice, not a derived approximation. This is
+   * that voice. Paraphrasing it here would reintroduce exactly the risk the gap existed to
+   * avoid. Closes missing-inputs #8.
+   */
+  meetTyler: {
+    heading: "Meet Tyler.",
+    body: [
+      "Tyler Reigate is the founder of Reigate Travel & Co., a lifestyle and wellness travel company created for people who want more from travel than simply getting away.", // [A]
+      "For Tyler, travel has always been about more than the destination. It is about how a place makes you feel, the people you meet, the stories you bring home, and the perspective you gain along the way. That curiosity has shaped the way she approaches travel planning today: thoughtfully, personally, and with a genuine interest in understanding what matters most to each client.", // [A]
+      "Through Reigate Travel & Co., Tyler creates highly considered travel experiences that bring together wellness, culture, beautiful places, and meaningful moments. Rather than starting with a package or itinerary, she starts with the person — how they like to travel, what they are drawn to, what they need more of, and what would make the experience feel truly worthwhile.", // [A]
+      "Her approach is relationship-driven and deeply personal. Tyler believes some of the best travel experiences come from having someone in your corner who listens well, asks the right questions, and can introduce you to places and experiences you may never have discovered on your own.", // [A]
+      "Beyond individual travel planning, Tyler is building Reigate Travel & Co. as a community around lifestyle, wellness, and discovery — bringing people together through local experiences, curated events, and journeys designed to create connection both at home and abroad.", // [A]
+      "At the heart of it all is a simple idea: travel should leave you feeling more connected, more inspired, and a little more yourself than when you left.", // [A]
+    ],
+  },
+
   story: {
     heading: "Why Reigate exists.",
     body: [
